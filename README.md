@@ -1,2 +1,2 @@
-# OOP-CNTT-UTC2
+# OOP-Game
 OOP
