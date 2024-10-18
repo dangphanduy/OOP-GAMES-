@@ -1,0 +1,11 @@
+﻿  Board.cpp
+C:\Users\anhla\source\repos\GAME\GAME\Board.cpp(19,78): warning C4267: 'argument': conversion from 'size_t' to '_Ty', possible loss of data
+C:\Users\anhla\source\repos\GAME\GAME\Board.cpp(19,78): warning C4267:         with
+C:\Users\anhla\source\repos\GAME\GAME\Board.cpp(19,78): warning C4267:         [
+C:\Users\anhla\source\repos\GAME\GAME\Board.cpp(19,78): warning C4267:             _Ty=int
+C:\Users\anhla\source\repos\GAME\GAME\Board.cpp(19,78): warning C4267:         ]
+C:\Users\anhla\source\repos\GAME\GAME\Board.cpp(173,28): warning C4244: 'initializing': conversion from '__int64' to 'int', possible loss of data
+C:\Users\anhla\source\repos\GAME\GAME\Board.cpp(192,73): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\anhla\source\repos\GAME\GAME\Board.cpp(192,57): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\anhla\source\repos\GAME\GAME\Board.cpp(201,24): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+LINK : fatal error LNK1104: cannot open file 'C:\Users\anhla\source\repos\GAME\x64\Release\GAME.exe'
