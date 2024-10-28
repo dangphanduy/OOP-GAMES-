@@ -22,7 +22,8 @@ Player::Player(const std::string& playerName, int initialMoney)
     turnsOnLostIsland(0),
     isOnLostIsland(false),
     worldsUsed(0),
-    onWorldTour(false)
+    onWorldTour(false),
+    hasMap(false)
 {}
 
 void Player::addRoll(int roll) {
@@ -53,7 +54,7 @@ void Player::printRollHistory() const {
 }
 
 int Player::calculateNewPosition(int steps) const {
-    return (position + steps + NUM_TILES) % NUM_TILES; // Bàn cờ có 40 ô
+    return (position + steps + NUM_TILES) % NUM_TILES; // Bàn cờ có 32 ô
 }
 
 std::vector<Tile*> Player::getOwnedProperties() const {

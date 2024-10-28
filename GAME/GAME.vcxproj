@@ -141,8 +141,10 @@
   <ItemGroup>
     <ClCompile Include="Board.cpp" />
     <ClCompile Include="GAME.cpp" />
+    <ClCompile Include="Game_Logic.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="SDL_functions.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Board.h" />

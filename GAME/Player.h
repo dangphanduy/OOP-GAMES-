@@ -16,6 +16,7 @@ private:
 	float targetX = 0.0f, targetY = 0.0f; // vị trí mục tiêu
 
 	std::string name;
+	SDL_Texture* houseTexture;
 	std::vector<int> rollHistory;
 	int previousRoll = 0;
 	int currentRoll = 0;
@@ -29,6 +30,7 @@ private:
 	bool isOnLostIsland = false;  // Người chơi có đang ở trên Lost Island không
 	int worldsUsed = 0;
 	bool onWorldTour = false;
+	bool hasMap = false;
 
 	bool hasReachedTarget() const;
 
@@ -52,6 +54,8 @@ public:
 	bool getIsOnLostIsland() const { return isOnLostIsland; }
 	int getWorldsUsed() const { return worldsUsed; }
 	bool getOnWorldTour() const { return onWorldTour; }
+	bool getHasMap() const { return hasMap; }
+	SDL_Texture* getHouseTexture() const { return houseTexture; }
 
 	// Setters (bỏ "set" trong tên hàm, sử dụng tham số với cùng tên)
 	void setX(float x) { this->x = x; }
@@ -71,6 +75,8 @@ public:
 	void setWorldsUsed(int worldsUsed) { this->worldsUsed = worldsUsed; }
 	void setTurnsOnLostIsland(int turnsOnLostIsland) { this->turnsOnLostIsland = turnsOnLostIsland; }
 	void setIsOnLostIsland(bool isOnLostIsland) { this->isOnLostIsland = isOnLostIsland; }
+	void setHasMap(bool hasMap) { this->hasMap = hasMap; }
+	void setHouseTexture(SDL_Texture* texture) { houseTexture = texture; }
 
 	// Các phương thức công khai
 	void addRoll(int roll);

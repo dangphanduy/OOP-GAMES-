@@ -85,6 +85,7 @@ void Board::applyTax(Player& player) {
     }
 }
 
+// Tính toán vị trí cho từng ô
 void Board::calculateTilePosition(int i, int& x, int& y) {
     switch (i) {
     case 0:  // Góc trên bên trái (START)
@@ -236,21 +237,18 @@ void Board::setupSpecialTiles() {
 
 void Board::renderBoards() {
     for (int i = 0; i < NUM_TILES; ++i) {
-        int x, y;
 
+        int x, y;
         calculateTilePosition(i, x, y);
-        // Save coordinates into the tile
         board[i].setPosition(x, y);
 
-        // Draw the outer border of the tile (black)
+        // Vẽ bảng mặc định
         SDL_Rect borderRect = { x, y, TILE_SIZE, TILE_SIZE };
         SDL_SetRenderDrawColor(game->getRenderer(), 0, 0, 0, 255);
         SDL_RenderFillRect(game->getRenderer(), &borderRect);
-
-        // Draw the inner part of the tile
         SDL_Rect innerRect = { x + 2, y + 2, TILE_SIZE - 4, TILE_SIZE - 4 };
 
-        // Set tile color based on its type
+        // Vẽ màu cho từng ô
         if(board[i].getTileType() == TileType::PROPERTY) {
             switch (board[i].getColorGroup()) {
             case ColorGroup::BROWN:
@@ -316,13 +314,14 @@ void Board::renderBoards() {
             // Tính toán tọa độ (x, y) cho ngôi nhà
             int houseX = x + 10; // Ví dụ: cách mép trái ô đất 10 pixel
             int houseY = y + 10; // Ví dụ: cách mép trên ô đất 10 pixel
+            SDL_Texture* houseTexture = game->getPlayer(board[i].getOwnerName()).getHouseTexture();
             for (int j = 0; j < board[i].getNumHouses(); ++j) {
-                renderHouse(game->getRenderer(), game->getHouseTexture(), houseX, houseY);
+                renderHouse(game->getRenderer(), houseTexture, houseX, houseY);
                 houseX += 15; // Ví dụ: khoảng cách giữa các ngôi nhà là 15 pixel
             }
         }
-        // Render the tile name
-        SDL_Color textColor = { 0, 0, 0 };  // Black
+        // Render tên ô 
+        SDL_Color textColor = { 0, 0, 0 }; 
         game->renderText(board[i].getName(), x + 5, y + 5, textColor);
     }
 }
@@ -332,6 +331,7 @@ void Board::renderPlayerAt(Player* player, int x, int y) {
     game->drawPlayer(playerTexture, player->getX(), player->getY());
 }
 
+// Vẽ người chơi
 void Board::renderPlayers() {
     for (Player& player : game->getPlayers()) {
         // Lấy vị trí hiện tại của người chơi
@@ -357,11 +357,13 @@ void Board::renderPlayers() {
     }
 }
 
+// Vẽ nhà
 void Board::renderHouse(SDL_Renderer* renderer, SDL_Texture* houseTexture, int x, int y) {
     SDL_Rect renderQuad = { x, y, 50, 50 };
     SDL_RenderCopy(renderer, houseTexture, nullptr, &renderQuad);
 }
 
+// Tạo ra bảng
 void Board::createBoard() {
     board.resize(NUM_TILES);
     setupSpecialTiles();

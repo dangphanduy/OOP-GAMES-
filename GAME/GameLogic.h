@@ -1,5 +1,5 @@
-﻿#ifndef GAME_H
-#define GAME_H
+#ifndef GAMELOGIC_H
+#define GAMELOGIC_H
 
 #include "Player.h"
 #include "Constants.h"
@@ -7,7 +7,6 @@
 #include "Tile.h"
 #include <SDL.h>
 #include <SDL_image.h>
-#include <SDL_ttf.h>
 #include <vector>
 #include <string>
 #include <functional>
@@ -20,7 +19,6 @@ public:
     ~Game();
 
     void run();
-    void initSDL();
     void initPlayers();
     void cleanup();
     void quitGame();
@@ -29,31 +27,22 @@ public:
     void handleKeyPress(SDL_Keycode key);
     void update(float deltaTime);
 
-    void render();
-    void renderText(const std::string& message, int x, int y, SDL_Color color);
-    void renderPlayerInfo();
-    void drawPlayer(SDL_Texture* texture, int x, int y);
-
     int rollDice();
     void handleRollDice(Player& currentPlayer);
-    void nextTurn(); 
+    void nextTurn();
 
-    bool hasRolledDoubles(); 
+    bool hasRolledDoubles();
     void setupChanceEvents();
 
     void buyHouse(Tile& tile);
     void buyBeach(Player& player, Tile& tile);
-
     void sellHouse(Player& player);
     std::vector<Tile*> getOwnedTilesWithHouses(Player& player);
     void displayOwnedTiles(Player& player, const std::vector<Tile*>& ownedTiles);
     int getPlayerChoice(size_t numChoices);
     void sellHouseOnTile(Player& player, Tile* tile);
 
-    SDL_Texture* loadTexture(const std::string& path, SDL_Renderer* renderer);
-
     // Getters
-    Player& getPlayer(const std::string& name);
     std::vector<Player>& getPlayers() { return players; }
     Board* getBoard() { return board; }
     int getCurrentPlayerIndex() const { return currentPlayerIndex; }
@@ -70,8 +59,9 @@ public:
     void setChanceEvents(const std::vector<std::function<void(Player&, std::vector<Player*>&)>>& newEvents) {
         this->chanceEvents = newEvents;
     }
+    Player& getPlayer(const std::string& name);
+
 private:
-    TTF_Font* font;
     std::vector<Player> players;
     Board* board;
     int currentPlayerIndex;
@@ -83,4 +73,4 @@ private:
     SDL_Renderer* renderer;
 };
 
-#endif  // GAME_H
+#endif  // GAMELOGIC_H

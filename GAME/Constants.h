@@ -24,7 +24,10 @@ const int SCREEN_HEIGHT = 800;
 const int STARTING_MONEY = 1500;
 
 // Đường dẫn tới hình ảnh ngôi nhà
-const std::string HOUSE_TEXTURE_PATH = "resized_house_image.png";
+const std::string HOUSE1_TEXTURE_PATH = "house1.png";
+const std::string HOUSE2_TEXTURE_PATH = "house2.png";
+const std::string HOUSE3_TEXTURE_PATH = "house3.png";
+const std::string HOUSE4_TEXTURE_PATH = "house4.png";
 
 // Phí mua bãi biển
 const int BEACH_COST = 200;

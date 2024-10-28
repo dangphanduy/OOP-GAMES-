@@ -1,11 +1,28 @@
 ﻿  Board.cpp
-C:\Users\anhla\source\repos\GAME\GAME\Board.cpp(19,78): warning C4267: 'argument': conversion from 'size_t' to '_Ty', possible loss of data
-C:\Users\anhla\source\repos\GAME\GAME\Board.cpp(19,78): warning C4267:         with
-C:\Users\anhla\source\repos\GAME\GAME\Board.cpp(19,78): warning C4267:         [
-C:\Users\anhla\source\repos\GAME\GAME\Board.cpp(19,78): warning C4267:             _Ty=int
-C:\Users\anhla\source\repos\GAME\GAME\Board.cpp(19,78): warning C4267:         ]
-C:\Users\anhla\source\repos\GAME\GAME\Board.cpp(173,28): warning C4244: 'initializing': conversion from '__int64' to 'int', possible loss of data
-C:\Users\anhla\source\repos\GAME\GAME\Board.cpp(192,73): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\anhla\source\repos\GAME\GAME\Board.cpp(192,57): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\anhla\source\repos\GAME\GAME\Board.cpp(201,24): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-LINK : fatal error LNK1104: cannot open file 'C:\Users\anhla\source\repos\GAME\x64\Release\GAME.exe'
+C:\Users\anhla\source\repos\GAME\GAME\Board.cpp(16,75): warning C4267: 'argument': conversion from 'size_t' to '_Ty', possible loss of data
+C:\Users\anhla\source\repos\GAME\GAME\Board.cpp(16,75): warning C4267:         with
+C:\Users\anhla\source\repos\GAME\GAME\Board.cpp(16,75): warning C4267:         [
+C:\Users\anhla\source\repos\GAME\GAME\Board.cpp(16,75): warning C4267:             _Ty=int
+C:\Users\anhla\source\repos\GAME\GAME\Board.cpp(16,75): warning C4267:         ]
+C:\Users\anhla\source\repos\GAME\GAME\Board.cpp(80,23): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\anhla\source\repos\GAME\GAME\Board.cpp(331,65): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\anhla\source\repos\GAME\GAME\Board.cpp(331,49): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\anhla\source\repos\GAME\GAME\Board.cpp(341,24): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  GAME.cpp
+  Game_Logic.cpp
+C:\Users\anhla\source\repos\GAME\GAME\Game_Logic.cpp(301,28): warning C4244: 'initializing': conversion from '__int64' to 'int', possible loss of data
+  main.cpp
+  Player.cpp
+C:\Users\anhla\source\repos\GAME\GAME\Player.cpp(80,61): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\anhla\source\repos\GAME\GAME\Player.cpp(80,42): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\anhla\source\repos\GAME\GAME\Player.cpp(104,28): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\anhla\source\repos\GAME\GAME\Player.cpp(109,34): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\anhla\source\repos\GAME\GAME\Player.cpp(112,62): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\anhla\source\repos\GAME\GAME\Player.cpp(117,63): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+  SDL_functions.cpp
+  Generating code
+  416 of 1488 functions (28.0%) were compiled, the rest were copied from previous compilation.
+    17 functions were new in current compilation
+    22 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  GAME.vcxproj -> C:\Users\anhla\source\repos\GAME\x64\Release\GAME.exe

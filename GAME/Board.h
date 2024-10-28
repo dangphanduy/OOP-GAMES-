@@ -41,6 +41,14 @@ public:
     void setBoard(const std::vector<Tile>& newBoard) {
         board = newBoard;
     }
+
+    std::vector<Tile>& getTiles() {
+        return tiles;
+    }
+
+    void setTiles(const std::vector<Tile>& newTiles) {
+        tiles = newTiles;
+    }
     
 private:
     const int specialTilePositions[12] = { 0, 8, 16, 24, 12, 20, 28, 4, 14, 18, 25, 30 };

@@ -10,6 +10,7 @@ void displayInstructions() {
     cout << "h. mua nha\n";
     cout << "l. ban nha\n";
     cout << "=========================================================================\n";
+    cout << "fix...\n";
 }
 
 int main(int argc, char* argv[]) {

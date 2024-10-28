@@ -1,3 +1,4 @@
 ﻿  GAME.cpp
-C:\Users\anhla\source\repos\GAME\GAME\GAME.cpp(329,28): warning C4244: 'initializing': conversion from '__int64' to 'int', possible loss of data
+C:\Users\anhla\source\repos\GAME\GAME\GAME.cpp(317,28): warning C4244: 'initializing': conversion from '__int64' to 'int', possible loss of data
+C:\Users\anhla\source\repos\GAME\GAME\GAME.cpp(116,1): warning C4715: 'Game::getPlayer': not all control paths return a value
   GAME.vcxproj -> C:\Users\anhla\source\repos\GAME\x64\Debug\GAME.exe
