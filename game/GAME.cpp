@@ -11,8 +11,8 @@ using namespace std;
 
 Game::Game(const std::vector<std::string>& playerNames) : currentPlayerIndex(0) {
     initSDL();
-    board = new Board(this); // Khởi tạo Board và truyền con trỏ đến Game
-    board->createBoard(); // Gọi phương thức tạo bảng
+    board = new Board(this); // Khởi tạo Board
+    board->createBoard();
     for (const auto& name : playerNames) {
         players.emplace_back(name, 1500);
     }
