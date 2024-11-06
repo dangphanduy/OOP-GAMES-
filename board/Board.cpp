@@ -8,21 +8,25 @@
 #include "Game.h"
 #include "TileBuilder.h"
 
-Board::Board(Game* gameInstance) : gameInstance(gameInstance) {}
-
+Board::Board(Game* game) : game(game) {}
+// Xử lý các sự kiện
 void Board::handleChanceEvent(Player& player) {
     std::random_device rd;
     std::mt19937 gen{ rd() };
-    std::uniform_int_distribution<> dis(0, gameInstance->getChanceEvents().size() - 1);
+    std::uniform_int_distribution<> dis(0, game->getChanceEvents().size() - 1);
     int eventIndex = dis(gen);
-    gameInstance->getChanceEvents()[eventIndex](player);  // Execute random Chance event
+    std::vector<Player*> playerPointers;
+    for (auto& player : game->getPlayers()) {
+        playerPointers.push_back(&player);
+    }
+    game->getChanceEvents()[eventIndex](player, playerPointers);
 }
 
 void Board::handleWorldsEvent(Player& player) {
     std::cout << player.getName() << " landed on Worlds!" << std::endl;
 
     // Lấy danh sách các ô đất mà người chơi sở hữu
-    const auto ownedProperties = player.getOwnedProperties(); // Sử dụng auto
+    const auto ownedProperties = player.getOwnedProperties();
 
     // Nếu người chơi không sở hữu ô đất nào
     if (ownedProperties.empty()) {
@@ -38,7 +42,12 @@ void Board::handleWorldsEvent(Player& player) {
 
     // Nhận lựa chọn của người chơi
     int choice;
-    std::cin >> choice;
+    if (!(std::cin >> choice)) { // Kiểm tra xem người chơi có nhập số nguyên hay không
+        std::cout << "Invalid choice." << std::endl;
+        std::cin.clear(); // Xóa lỗi
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Xóa bộ đệm
+        return;
+    }
 
     // Xử lý lựa chọn
     if (choice > 0 && choice <= ownedProperties.size()) {
@@ -56,11 +65,13 @@ void Board::handleWorldsEvent(Player& player) {
 
 void Board::applyTax(Player& player) {
     // Tìm ô Tax trên bàn cờ
-    Tile* taxTile = nullptr;
-    for (Tile& t : board) {
-        if (t.getTileType() == TileType::TAX) {
-            taxTile = &t;
-            break;
+    static Tile* taxTile = nullptr; // Sử dụng static để lưu trữ giá trị giữa các lần gọi hàm
+    if (taxTile == nullptr) {
+        for (Tile& t : board) {
+            if (t.getTileType() == TileType::TAX) {
+                taxTile = &t;
+                break;
+            }
         }
     }
 
@@ -80,7 +91,7 @@ void Board::applyTax(Player& player) {
             << taxTile->getName() << std::endl;
     }
 }
-
+// Tính toán vị trí cho từng ô
 void Board::calculateTilePosition(int i, int& x, int& y) {
     switch (i) {
     case 0:  // Góc trên bên trái (START)
@@ -121,36 +132,66 @@ void Board::calculateTilePosition(int i, int& x, int& y) {
 }
 
 void Board::setupSpecialTiles() {
-    // Tạo danh sách các ô đặc biệt
-    struct SpecialTileInfo {
-        std::string name;
-        TileType type;
-        std::function<void(Player*)> onLand; // Sử dụng Player*
-        int cost = 0;
-        int houseMax = 4; // Giá trị mặc định cho houseMax
-    };
-    std::vector<SpecialTileInfo> specialTiles = {
-        {"Start", TileType::START, [](Player* player) { player->setMoney(player->getMoney() + 200); }},
-        {"Lost Island", TileType::LOST_ISLAND, [](Player* player) {
-            player->setIsOnLostIsland(true);
-            std::cout << player->getName() << " is stranded on Lost Island!" << std::endl;
-        }},
-        {"Worlds", TileType::WORLDS, [this](Player* player) { this->handleWorldsEvent(*player); }},
-        {"World Tour", TileType::WORLD_TOUR, [](Player* player) {
-            player->setOnWorldTour(true);
-            std::cout << player->getName() << " activated World Tour!" << std::endl;
-        }},
-        {"Chance", TileType::CHANCE, [this](Player* player) { this->handleChanceEvent(*player); }},
-        {"Chance", TileType::CHANCE, [this](Player* player) { this->handleChanceEvent(*player); }},
-        {"Chance", TileType::CHANCE, [this](Player* player) { this->handleChanceEvent(*player); }},
-        {"Beach", TileType::BEACH, nullptr, 200, 1},
-        {"Beach", TileType::BEACH, nullptr, 200, 1},
-        {"Beach", TileType::BEACH, nullptr, 200, 1},
-        {"Beach", TileType::BEACH, nullptr, 200, 1},
-        {"Tax", TileType::TAX, [this](Player* player) { this->applyTax(*player); }} // Giả sử applyTax chỉ nhận Player*
-    };
+    // Các ô đặc biệt
+    board[0] = TileBuilder()
+        .withName("Start")
+        .withType(TileType::START)
+        .withOnLand([this](Player* player) {  player->setMoney(player->getMoney() + 200); })
+        .build();
+    board[8] = TileBuilder()
+        .withName("Lost Island")
+        .withType(TileType::LOST_ISLAND)
+        .withOnLand([this](Player* player) { 
+        player->setIsOnLostIsland(true);
+        std::cout << player->getName() << " is stranded on Lost Island!" << std::endl; })
+        .build();
+    board[16] = TileBuilder()
+        .withName("Worlds")
+        .withType(TileType::WORLDS)
+        .withOnLand([this](Player* player) { 
+        this->handleWorldsEvent(*player); 
+            })
+        .build();
+    board[24] = TileBuilder()
+        .withName("World Tour")
+        .withType(TileType::WORLD_TOUR)
+        .withOnLand([this](Player* player) { 
+        player->setOnWorldTour(true);
+        std::cout << player->getName() << " activated World Tour!" << std::endl;
+            })
+        .build();
+    board[30] = TileBuilder()
+        .withName("TAX")
+        .withType(TileType::TAX)
+        .withOnLand([this](Player* player) {
+        this->applyTax(*player);
+            })
+        .build();
+    // Các ô cơ hội 
+    for (int i : {12, 20, 28}) {
+        board[i] = TileBuilder()
+            .withName("Chance")
+            .withType(TileType::CHANCE)
+            .withOnLand([this](Player *player) {  this->handleChanceEvent(*player); })
+            .build();
+    }
 
-    // Tạo danh sách các ô Property
+    // Các ô bãi biển
+    for (int i : {4, 14, 18, 25}) {
+        board[i] = TileBuilder()
+            .withName("Beach")
+            .withCost(200)
+            .withType(TileType::BEACH)
+            .withHouseMax(1)
+            .build();
+    }
+
+    bool usedPositions[NUM_TILES] = { false }; // Khởi tạo tất cả là false
+    for (int pos : specialTilePositions) {
+        usedPositions[pos] = true; // Đánh dấu các vị trí của ô đặc biệt là true
+    }
+
+    //Các ô đất thường
     struct PropertyInfo {
         std::string name;
         int cost;
@@ -158,45 +199,31 @@ void Board::setupSpecialTiles() {
     };
     std::vector<PropertyInfo> properties = {
         {"GRANADA", 120, ColorGroup::BROWN},
-            {"SEVILLE", 120, ColorGroup::BROWN},
-            {"MADRID", 150, ColorGroup::BROWN},
-            {"MADRID", 150, ColorGroup::BROWN},
-            {"MA CAO", 170, ColorGroup::PINK},
-            {"BEIJING", 200, ColorGroup::PINK},
-            {"SHANGHAI", 220, ColorGroup::PINK},
-            {"VENICE", 250, ColorGroup::DARK_BLUE},
-            {"MILAN", 270, ColorGroup::DARK_BLUE},
-            {"ROME", 300, ColorGroup::DARK_BLUE},
-            {"HAMBURG", 330,  ColorGroup::ORANGE},
-            {"BERLIN", 360,  ColorGroup::ORANGE},
-            {"LONDON", 400,  ColorGroup::YELLOW},
-            {"SYDNEY", 420,  ColorGroup::YELLOW},
-            {"CHICAGO", 450,ColorGroup::NONE},
-            {"LAS VEGAS", 470, ColorGroup::NONE},
-            {"NEW YORK", 500, ColorGroup::NONE},
-            {"LYON", 520,  ColorGroup::GREEN},
-            {"PARIS", 560, ColorGroup::GREEN},
-            {"OSAKA", 580, ColorGroup::LIGHT_BLUE},
-            {"TOKYO", 650, ColorGroup::LIGHT_BLUE}
+        {"SEVILLE", 120, ColorGroup::BROWN},
+        {"MADRID", 150, ColorGroup::BROWN},
+        {"MA CAO", 170, ColorGroup::PINK},
+        {"BEIJING", 200, ColorGroup::PINK},
+        {"SHANGHAI", 220, ColorGroup::PINK},
+        {"VENICE", 250, ColorGroup::DARK_BLUE},
+        {"MILAN", 270, ColorGroup::DARK_BLUE},
+        {"ROME", 300, ColorGroup::DARK_BLUE},
+        {"HAMBURG", 330,  ColorGroup::ORANGE},
+        {"BERLIN", 360,  ColorGroup::ORANGE},
+        {"LONDON", 400,  ColorGroup::YELLOW},
+        {"SYDNEY", 420,  ColorGroup::YELLOW},
+        {"CHICAGO", 450,ColorGroup::NAVAJO_WHITE},
+        {"LAS VEGAS", 470, ColorGroup::NAVAJO_WHITE},
+        {"NEW YORK", 500, ColorGroup::NAVAJO_WHITE},
+        {"LYON", 520,  ColorGroup::GREEN},
+        {"PARIS", 560, ColorGroup::GREEN},
+        {"OSAKA", 580, ColorGroup::LIGHT_BLUE},
+        {"TOKYO", 650, ColorGroup::LIGHT_BLUE}
     };
 
-    // Khởi tạo các ô đặc biệt
-    int specialTileIndex = 0;
-    for (int i = 0; i < NUM_TILES; ++i) {
-        if (specialTileIndex < specialTiles.size() &&
-            i == specialTilePositions[specialTileIndex]) { // Kiểm tra vị trí của ô đặc biệt
-            SpecialTileInfo info = specialTiles[specialTileIndex];
-            board[i] = TileBuilder()
-                .withName(info.name)
-                .withType(info.type)
-                .withOnLand(info.onLand)
-                .withCost(info.cost)
-                .withHouseMax(info.houseMax)
-                .build();
-            specialTileIndex++;
-        }
-        else if (i - 1 < properties.size()) { // Kiểm tra vị trí của ô Property
-            PropertyInfo info = properties[i - 1];
+    int propertyIndex = 0;
+    for (int i = 0; i < NUM_TILES && propertyIndex < properties.size(); ++i) {
+        if (!usedPositions[i]) { // Chỉ tạo ô nếu vị trí chưa được sử dụng
+            PropertyInfo info = properties[propertyIndex];
             board[i] = TileBuilder()
                 .withName(info.name)
                 .withCost(info.cost)
@@ -204,17 +231,109 @@ void Board::setupSpecialTiles() {
                 .withHouseMax(4)
                 .withColorGroup(info.colorGroup)
                 .build();
+            propertyIndex++;
         }
     }
 }
 
+void Board::renderBoards() {
+    for (int i = 0; i < NUM_TILES; ++i) {
+
+        int x, y;
+        calculateTilePosition(i, x, y);
+        board[i].setPosition(x, y);
+
+        // Vẽ bảng mặc định
+        SDL_Rect borderRect = { x, y, TILE_SIZE, TILE_SIZE };
+        SDL_SetRenderDrawColor(game->getRenderer(), 0, 0, 0, 255);
+        SDL_RenderFillRect(game->getRenderer(), &borderRect);
+        SDL_Rect innerRect = { x + 2, y + 2, TILE_SIZE - 4, TILE_SIZE - 4 };
+
+        // Vẽ màu cho từng ô
+        if(board[i].getTileType() == TileType::PROPERTY) {
+            switch (board[i].getColorGroup()) {
+            case ColorGroup::BROWN:
+                SDL_SetRenderDrawColor(game->getRenderer(), 150, 75, 0, 255);
+                break;
+            case ColorGroup::DARK_BLUE:
+                SDL_SetRenderDrawColor(game->getRenderer(), 0, 0, 139, 255);
+                break;
+            case ColorGroup::GREEN:
+                SDL_SetRenderDrawColor(game->getRenderer(), 0, 128, 0, 255);
+                break;
+            case ColorGroup::LIGHT_BLUE:
+                SDL_SetRenderDrawColor(game->getRenderer(), 173, 216, 230, 255);
+                break;
+            case ColorGroup::ORANGE:
+                SDL_SetRenderDrawColor(game->getRenderer(), 255, 165, 0, 255);
+                break;
+            case ColorGroup::YELLOW:
+                SDL_SetRenderDrawColor(game->getRenderer(), 255, 255, 0, 255);
+                break;
+            case ColorGroup::PINK:
+                SDL_SetRenderDrawColor(game->getRenderer(), 255, 192, 203, 255);
+                break;
+            case ColorGroup::NAVAJO_WHITE:
+                SDL_SetRenderDrawColor(game->getRenderer(), 255, 222, 173, 255); // navajo trắng
+                break;
+            default:
+                SDL_SetRenderDrawColor(game->getRenderer(), 255, 255, 255, 255); 
+                break;
+            }
+        }
+        else {
+            switch (board[i].getTileType()) {
+            case TileType::START:
+                SDL_SetRenderDrawColor(game->getRenderer(), 0, 255, 0, 255);  // Xanh lá
+                break;
+            case TileType::LOST_ISLAND:
+                SDL_SetRenderDrawColor(game->getRenderer(), 0, 206, 209, 255);  // Xanh lá
+                break;
+            case TileType::WORLD_TOUR:
+                SDL_SetRenderDrawColor(game->getRenderer(), 128, 128, 128, 255);  // Màu xám
+                break;
+            case TileType::WORLDS:
+                SDL_SetRenderDrawColor(game->getRenderer(), 100, 149, 237, 255);  // màu xanh hoa ngô đồng
+                break;
+            case TileType::CHANCE:
+                SDL_SetRenderDrawColor(game->getRenderer(), 255, 0, 0, 255);  // Màu đỏ
+                break;
+            case TileType::BEACH:
+                SDL_SetRenderDrawColor(game->getRenderer(), 0, 127, 255, 255);  // Màu xanh dương
+                break;
+            case TileType::TAX:
+                SDL_SetRenderDrawColor(game->getRenderer(), 245, 255, 250, 255);  // kem bạc hà
+                break;
+            default:
+                SDL_SetRenderDrawColor(game->getRenderer(), 255, 255, 255, 255);  // Màu trắng
+                break;
+            }
+        }
+
+        SDL_RenderFillRect(game->getRenderer(), &innerRect);
+        if (board[i].getTileType() == TileType::PROPERTY && board[i].getNumHouses() > 0) {
+            // Tính toán tọa độ (x, y) cho ngôi nhà
+            int houseX = x + 10; // Ví dụ: cách mép trái ô đất 10 pixel
+            int houseY = y + 10; // Ví dụ: cách mép trên ô đất 10 pixel
+            SDL_Texture* houseTexture = game->getPlayer(board[i].getOwnerName()).getHouseTexture();
+            for (int j = 0; j < board[i].getNumHouses(); ++j) {
+                renderHouse(game->getRenderer(), houseTexture, houseX, houseY);
+                houseX += 15; // Ví dụ: khoảng cách giữa các ngôi nhà là 15 pixel
+            }
+        }
+        // Render tên ô 
+        SDL_Color textColor = { 0, 0, 0 }; 
+        game->renderText(board[i].getName(), x + 5, y + 5, textColor);
+    }
+}
+// Vẽ người chơi
 void Board::renderPlayerAt(Player* player, int x, int y) {
     SDL_Texture* playerTexture = player->getSprite();
-    gameInstance->drawPlayer(playerTexture, player->getX(), player->getY());
+    game->drawPlayer(playerTexture, player->getX(), player->getY());
 }
 
 void Board::renderPlayers() {
-    for (Player& player : gameInstance->getPlayers()) {
+    for (Player& player : game->getPlayers()) {
         // Lấy vị trí hiện tại của người chơi
         Tile& tile = board[player.getPosition()];
 
@@ -237,71 +356,12 @@ void Board::renderPlayers() {
         }
     }
 }
-
-void Board::renderBoards() {
-    for (int i = 0; i < NUM_TILES; ++i) {
-        int x, y;
-
-        calculateTilePosition(i, x, y);
-        // Save coordinates into the tile
-        board[i].setPosition(x, y);
-        
-        // Draw the outer border of the tile (black)
-        SDL_Rect borderRect = { x, y, TILE_SIZE, TILE_SIZE };
-        SDL_SetRenderDrawColor(gameInstance->getRenderer(), 0, 0, 0, 255);
-        SDL_RenderFillRect(gameInstance->getRenderer(), &borderRect);
-
-        // Draw the inner part of the tile
-        SDL_Rect innerRect = { x + 2, y + 2, TILE_SIZE - 4, TILE_SIZE - 4 };
-
-        // Set tile color based on its type
-        switch (board[i].getTileType()) {
-        case TileType::START:
-            SDL_SetRenderDrawColor(gameInstance->getRenderer(), 0, 255, 0, 255);  // Green
-            break;
-        case TileType::LOST_ISLAND:
-            SDL_SetRenderDrawColor(gameInstance->getRenderer(), 128, 128, 128, 255);  // Gray
-            break;
-        case TileType::WORLDS:
-            SDL_SetRenderDrawColor(gameInstance->getRenderer(), 255, 165, 0, 255);  // Orange
-            break;
-        case TileType::CHANCE:
-            SDL_SetRenderDrawColor(gameInstance->getRenderer(), 255, 0, 0, 255);  // Red
-            break;
-        case TileType::WORLD_TOUR:
-            SDL_SetRenderDrawColor(gameInstance->getRenderer(), 255, 255, 0, 255);  // Yellow
-            break;
-        case TileType::BEACH:
-            SDL_SetRenderDrawColor(gameInstance->getRenderer(), 0, 127, 255, 255);  // Blue
-            break;
-        case TileType::TAX:
-            SDL_SetRenderDrawColor(gameInstance->getRenderer(), 0, 127, 255, 0);  
-            break;
-        default:
-            SDL_SetRenderDrawColor(gameInstance->getRenderer(), 255, 255, 255, 255);  // White
-        }
-
-        SDL_RenderFillRect(gameInstance->getRenderer(), &innerRect);
-        if (board[i].getTileType() == TileType::PROPERTY && board[i].getNumHouses() > 0) {
-            // Tính toán tọa độ (x, y) cho ngôi nhà
-            int houseX = x + 10; // Ví dụ: cách mép trái ô đất 10 pixel
-            int houseY = y + 10; // Ví dụ: cách mép trên ô đất 10 pixel
-            for (int j = 0; j < board[i].getNumHouses(); ++j) {
-                renderHouse(gameInstance->getRenderer(), gameInstance->getHouseTexture(), houseX, houseY);
-                houseX += 15; // Ví dụ: khoảng cách giữa các ngôi nhà là 15 pixel
-            }
-        }
-        // Render the tile name
-        SDL_Color textColor = { 0, 0, 0 };  // Black
-        gameInstance->renderText(board[i].getName(), x + 5, y + 5, textColor);
-    }
-}
-
+// Vẽ nhà
 void Board::renderHouse(SDL_Renderer* renderer, SDL_Texture* houseTexture, int x, int y) {
     SDL_Rect renderQuad = { x, y, 50, 50 };
     SDL_RenderCopy(renderer, houseTexture, nullptr, &renderQuad);
 }
-
+// Tạo ra bảng
 void Board::createBoard() {
     board.resize(NUM_TILES);
     setupSpecialTiles();
