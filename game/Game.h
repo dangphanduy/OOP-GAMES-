@@ -36,9 +36,9 @@ public:
 
     int rollDice();
     void handleRollDice(Player& currentPlayer);
+    bool hasRolledDoubles();
     void nextTurn(); 
 
-    bool hasRolledDoubles(); 
     void setupChanceEvents();
 
     void buyHouse(Tile& tile);
