@@ -22,7 +22,8 @@ Player::Player(const std::string& playerName, int initialMoney)
     turnsOnLostIsland(0),
     isOnLostIsland(false),
     worldsUsed(0),
-    onWorldTour(false)
+    onWorldTour(false),
+    hasMap(false)
 {}
 
 void Player::addRoll(int roll) {
@@ -30,7 +31,7 @@ void Player::addRoll(int roll) {
 }
 
 void Player::addProperty(Tile* tile) {
-    //properties.push_back(tile);
+    properties.insert(tile);
 }
 
 int Player::countHouses() const {
@@ -53,7 +54,7 @@ void Player::printRollHistory() const {
 }
 
 int Player::calculateNewPosition(int steps) const {
-    return (position + steps + 40) % 40; // Bàn cờ có 40 ô
+    return (position + steps + NUM_TILES) % NUM_TILES; // Bàn cờ có 32 ô
 }
 
 std::vector<Tile*> Player::getOwnedProperties() const {
@@ -84,21 +85,7 @@ void Player::move(int steps, std::vector<Tile>& board){
         // Thêm người chơi vào ô mới
         Tile& newTile = board[position];
         newTile.addPlayer(this);
-
-        // Kích hoạt sự kiện trên ô mới nếu có
-        if (board[position].getOnLand()) {
-            //board[position].getOnLand()(*this);
-        }
     }
-}
-
-void Player::displayInfo() const {
-    std::cout << "--------------------------------" << std::endl;
-    std::cout << "Player: " << name << std::endl;
-    std::cout << "Money: $" << money << std::endl;
-    std::cout << "Position on board: " << position << std::endl;
-    std::cout << "Number of houses owned: " << countHouses() << std::endl;
-    std::cout << "--------------------------------" << std::endl;
 }
 
 void Player::setTargetPosition(float x, float y) {
@@ -140,14 +127,9 @@ void Player::updatePosition(float deltaTime, const std::vector<Player>& otherPla
 
             // Kiểm tra va chạm với người chơi khác và điều chỉnh vị trí nếu cần
             for (const Player& other : otherPlayers) {
-                
-        // Improved collision handling with margin for error
-        if (&other != this && std::abs(other.x - this->x) < TILE_SIZE * 0.1f && std::abs(other.y - this->y) < TILE_SIZE * 0.1f) {
-            this->x += TILE_SIZE * 0.1f;
-            this->y += TILE_SIZE * 0.1f;
-
-                    x += TILE_SIZE * 0.1f;  // Điều chỉnh x để không bị trùng vị trí
-                    y += TILE_SIZE * 0.1f;  // Điều chỉnh y để không bị trùng vị trí
+                if (&other != this && std::abs(other.x - this->x) < TILE_SIZE * 0.1f && std::abs(other.y - this->y) < TILE_SIZE * 0.1f) {
+                    this->x += TILE_SIZE * 0.2f; // Tăng khoảng cách x 
+                    this->y += TILE_SIZE * 0.2f; // Tăng khoảng cách y
                 }
             }
         }
