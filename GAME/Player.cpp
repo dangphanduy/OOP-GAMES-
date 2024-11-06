@@ -31,7 +31,7 @@ void Player::addRoll(int roll) {
 }
 
 void Player::addProperty(Tile* tile) {
-    //properties.push_back(tile);
+    properties.insert(tile);
 }
 
 int Player::countHouses() const {
@@ -134,12 +134,9 @@ void Player::updatePosition(float deltaTime, const std::vector<Player>& otherPla
             for (const Player& other : otherPlayers) {
                 
         // Improved collision handling with margin for error
-        if (&other != this && std::abs(other.x - this->x) < TILE_SIZE * 0.1f && std::abs(other.y - this->y) < TILE_SIZE * 0.1f) {
-            this->x += TILE_SIZE * 0.1f;
-            this->y += TILE_SIZE * 0.1f;
-
-                    x += TILE_SIZE * 0.1f;  // Điều chỉnh x để không bị trùng vị trí
-                    y += TILE_SIZE * 0.1f;  // Điều chỉnh y để không bị trùng vị trí
+                if (&other != this && std::abs(other.x - this->x) < TILE_SIZE * 0.1f && std::abs(other.y - this->y) < TILE_SIZE * 0.1f) {
+                    this->x += TILE_SIZE * 0.2f; // Tăng khoảng cách x 
+                    this->y += TILE_SIZE * 0.2f; // Tăng khoảng cách y
                 }
             }
         }

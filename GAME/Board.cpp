@@ -42,7 +42,12 @@ void Board::handleWorldsEvent(Player& player) {
 
     // Nhận lựa chọn của người chơi
     int choice;
-    std::cin >> choice;
+    if (!(std::cin >> choice)) { // Kiểm tra xem người chơi có nhập số nguyên hay không
+        std::cout << "Invalid choice." << std::endl;
+        std::cin.clear(); // Xóa lỗi
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Xóa bộ đệm
+        return;
+    }
 
     // Xử lý lựa chọn
     if (choice > 0 && choice <= ownedProperties.size()) {
@@ -60,11 +65,13 @@ void Board::handleWorldsEvent(Player& player) {
 
 void Board::applyTax(Player& player) {
     // Tìm ô Tax trên bàn cờ
-    Tile* taxTile = nullptr;
-    for (Tile& t : board) {
-        if (t.getTileType() == TileType::TAX) {
-            taxTile = &t;
-            break;
+    static Tile* taxTile = nullptr; // Sử dụng static để lưu trữ giá trị giữa các lần gọi hàm
+    if (taxTile == nullptr) {
+        for (Tile& t : board) {
+            if (t.getTileType() == TileType::TAX) {
+                taxTile = &t;
+                break;
+            }
         }
     }
 
@@ -130,17 +137,14 @@ void Board::setupSpecialTiles() {
     board[0] = TileBuilder()
         .withName("Start")
         .withType(TileType::START)
-        .withOnLand([this](Player* player) { 
-        player->setMoney(player->getMoney() + 200);
-            })
+        .withOnLand([this](Player* player) {  player->setMoney(player->getMoney() + 200); })
         .build();
     board[8] = TileBuilder()
         .withName("Lost Island")
         .withType(TileType::LOST_ISLAND)
         .withOnLand([this](Player* player) { 
         player->setIsOnLostIsland(true);
-        std::cout << player->getName() << " is stranded on Lost Island!" << std::endl;
-            })
+        std::cout << player->getName() << " is stranded on Lost Island!" << std::endl; })
         .build();
     board[16] = TileBuilder()
         .withName("Worlds")
@@ -169,9 +173,7 @@ void Board::setupSpecialTiles() {
         board[i] = TileBuilder()
             .withName("Chance")
             .withType(TileType::CHANCE)
-            .withOnLand([this](Player *player) { 
-            this->handleChanceEvent(*player); 
-                })
+            .withOnLand([this](Player *player) {  this->handleChanceEvent(*player); })
             .build();
     }
 
@@ -325,13 +327,12 @@ void Board::renderBoards() {
         game->renderText(board[i].getName(), x + 5, y + 5, textColor);
     }
 }
-
+// Vẽ người chơi
 void Board::renderPlayerAt(Player* player, int x, int y) {
     SDL_Texture* playerTexture = player->getSprite();
     game->drawPlayer(playerTexture, player->getX(), player->getY());
 }
 
-// Vẽ người chơi
 void Board::renderPlayers() {
     for (Player& player : game->getPlayers()) {
         // Lấy vị trí hiện tại của người chơi
@@ -356,13 +357,11 @@ void Board::renderPlayers() {
         }
     }
 }
-
 // Vẽ nhà
 void Board::renderHouse(SDL_Renderer* renderer, SDL_Texture* houseTexture, int x, int y) {
     SDL_Rect renderQuad = { x, y, 50, 50 };
     SDL_RenderCopy(renderer, houseTexture, nullptr, &renderQuad);
 }
-
 // Tạo ra bảng
 void Board::createBoard() {
     board.resize(NUM_TILES);

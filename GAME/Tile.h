@@ -69,6 +69,12 @@ public:
     std::function<void(Player*)> getOnLand() const { return onLand; }
     void setOnLand(const std::function<void(Player*)>& newOnLand) { onLand = newOnLand; }
 
+    void triggerOnLand(Player* player) {
+        if (onLand) {
+            onLand(player);
+        }
+    }
+
     // Thêm người chơi vào ô
     void addPlayer(Player* player) {
         playersOnTile.insert(player);

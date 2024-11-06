@@ -57,8 +57,8 @@ void Game::handleKeyPress(SDL_Keycode key) {
     else if (key == SDLK_l) {
         sellHouse(currentPlayer);
     }
-    else if (key == SDLK_p) {
-        currentPlayer.printRollHistory();
+    else if (key == SDLK_ESCAPE) {
+        exit(1);
     }
 }
 
@@ -72,7 +72,7 @@ void Game::update(float deltaTime) {
         // Kiểm tra xem player đã đến đích chưa
         if (!currentPlayer.getIsMoving()) {
             std::cout << currentPlayer.getName() << " has reached the target position." << std::endl;
-
+            board->getBoard()[currentPlayer.getPosition()].triggerOnLand(&currentPlayer);
             // Kiểm tra xem người chơi có đang ở trên Lost Island hay không
             if (currentPlayer.getIsOnLostIsland()) {
                 currentPlayer.setTurnsOnLostIsland(currentPlayer.getTurnsOnLostIsland() + 1);
@@ -245,7 +245,7 @@ void Game::setupChanceEvents() {
 }
 
 void Game::buyHouse(Tile& tile) {
-    Player& currentPlayer = players[currentPlayerIndex];
+    Player& currentPlayer = players[currentPlayerIndex]; // Thay đổi cách truy cập players
 
     // Kiểm tra loại ô đất
     if (tile.getTileType() != TileType::PROPERTY) {
@@ -267,9 +267,18 @@ void Game::buyHouse(Tile& tile) {
 
     // Kiểm tra khả năng mua nhà
     if (currentPlayer.canBuyHouse(tile) && currentPlayer.getMoney() >= tile.getHousePrice()) {
-        currentPlayer.setMoney(currentPlayer.getMoney() - tile.getHousePrice());
-        tile.setNumHouses(tile.getNumHouses() + 1);
-        std::cout << "You have successfully purchased a house on " << tile.getName() << "." << std::endl;
+        char choice;
+        std::cout << "Are you sure you want to buy a beach on " << tile.getName() << " for " << tile.getHousePrice() << " ? (Y / N) : ";
+        std::cin >> choice;
+
+        if (choice == 'Y' || choice == 'y') {
+            currentPlayer.setMoney(currentPlayer.getMoney() - tile.getHousePrice());
+            tile.setNumHouses(tile.getNumHouses() + 1);
+            std::cout << "You have bought a house in " << tile.getName() << "." << std::endl;
+        }
+        else {
+            std::cout << "You didn't buy a house." << std::endl;
+        }
     }
     else {
         if (tile.getNumHouses() >= MAX_HOUSE) {
@@ -292,11 +301,17 @@ void Game::buyBeach(Player& player, Tile& tile) {
 
         // Kiểm tra người chơi có đủ tiền để mua bãi biển
         if (player.getMoney() >= BEACH_COST) {
-            player.setMoney(player.getMoney() - BEACH_COST);
-            tile.setOwnerName(player.getName());
-            player.addProperty(&tile);
-            std::cout << player.getName() << " bought the beach: " << tile.getName() << std::endl;
+            char choice;
+            std::cout << "Are you sure you want to buy a beach on " << tile.getName() << " for " << tile.getHousePrice() << " ? (Y / N) : ";
+            std::cin >> choice;
 
+            if (choice == 'Y' || choice == 'y') {
+                player.setMoney(player.getMoney() - BEACH_COST);
+                tile.setOwnerName(player.getName());
+                player.addProperty(&tile);
+                std::cout << player.getName() << " bought the beach." << std::endl;
+            }
+            else std::cout << player.getName() << " didn't buy the beach.";
             // Kiểm tra nếu người chơi sở hữu cả 4 bãi biển
             int beachCount = std::count_if(
                 player.getProperties().begin(),
@@ -335,7 +350,17 @@ void Game::sellHouse(Player& player) {
     }
 
     Tile* selectedTile = ownedTiles[choice - 1];
-    sellHouseOnTile(player, selectedTile);
+
+    char confirm;
+    std::cout << "Are you sure you want to sell a house on " << selectedTile->getName() << "? (Y/N): ";
+    std::cin >> confirm;
+
+    if (confirm == 'Y' || confirm == 'y') {
+        sellHouseOnTile(player, selectedTile);
+    }
+    else {
+        std::cout << player.getName() << " did not sell the house." << std::endl;
+    }
 }
 
 std::vector<Tile*> Game::getOwnedTilesWithHouses(Player& player) {

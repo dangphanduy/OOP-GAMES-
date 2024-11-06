@@ -22,9 +22,7 @@ Game::Game(const std::vector<std::string>& playerNames) : currentPlayerIndex(0) 
 }
 
 Game::~Game() {
-    if (board != nullptr) {
-        delete board;
-    }
+    delete board;
     cleanup();
 }
 
