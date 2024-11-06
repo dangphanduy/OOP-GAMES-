@@ -10,7 +10,7 @@ void displayInstructions() {
     cout << "| Phim | Chuc nang                                                    |\n";
     cout << "|------|--------------------------------------------------------------|\n";
     cout << "| Space| Do xuc xac                                                   |\n";
-    cout << "| b    | Mua bãi biển                                                 |\n";
+    cout << "| b    | Mua bai bien                                                 |\n";
     cout << "| h    | Mua nha                                                      |\n";
     cout << "| l    | Ban nha                                                      |\n";
     cout << "| ESC  | Thoat khoi tro choi                                          |\n";
