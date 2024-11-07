@@ -29,6 +29,10 @@ void displayInstructions() {
     cout << "1. So huu tat ca cac bai bien.\n";
     cout << "2. La nguoi choi cuoi cung con lai khong bi pha san.\n";
     cout << "--------------------------------------------\n";
+    cout << "\nLuu y dac biet:\n";
+    cout << "Ban chi co the mua nha khi ban da so huu o dat do.\n";
+    cout << "Trong qua trinh mua dat, neu ban khong mua dat, dat do se duoc mang di dau gia voi nguoi choi khac.\n";
+    cout << "--------------------------------------------\n";
 }
 
 int main(int argc, char* argv[]) {
