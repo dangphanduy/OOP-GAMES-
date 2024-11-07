@@ -68,13 +68,13 @@ void Game::update(float deltaTime) {
     // Nếu player di chuyển, cập nhật vị trí của họ
     if (currentPlayer.getIsMoving()) {
         currentPlayer.updatePosition(deltaTime, players);
-
         // Kiểm tra xem player đã đến đích chưa
         if (!currentPlayer.getIsMoving()) {
             std::cout << currentPlayer.getName() << " has reached the target position." << std::endl;
 
             // Kích hoạt sự kiện nếu có
-            board->getBoard()[currentPlayer.getPosition()].triggerOnLand(&currentPlayer);
+            Tile& landedTile = board->getBoard()[currentPlayer.getPosition()];
+            landedTile.triggerOnLand(&currentPlayer);
 
             // Kiểm tra xem người chơi có đang ở trên Lost Island hay không
             if (currentPlayer.getIsOnLostIsland()) {
@@ -100,9 +100,87 @@ void Game::update(float deltaTime) {
                 std::cout << currentPlayer.getName() << " is bankrupt!" << std::endl;
             }
 
+            // Nếu ô đất chưa có người sở hữu và là loại PROPERTY
+            if (landedTile.getTileType() == TileType::PROPERTY && landedTile.getOwnerName().empty()) {
+                // Hiển thị thông tin ô đất và giá tiền
+                std::cout << landedTile.getName() << " is available for purchase for $" << landedTile.getHousePrice() << std::endl;
+
+                // Xử lý mua đất hoặc đấu giá
+                if (currentPlayer.getMoney() >= landedTile.getHousePrice()) {
+                    char choice;
+                    std::cout << "Do you want to buy " << landedTile.getName() << "? (Y/N): ";
+                    std::cin >> choice;
+
+                    if (choice == 'Y' || choice == 'y') {
+                        // Trừ tiền người chơi và đặt người chơi làm chủ sở hữu
+                        currentPlayer.setMoney(currentPlayer.getMoney() - landedTile.getHousePrice());
+                        landedTile.setOwnerName(currentPlayer.getName());
+                        currentPlayer.addProperty(&landedTile); // Thêm đất vào danh sách tài sản
+                        std::cout << currentPlayer.getName() << " bought " << landedTile.getName() << std::endl;
+                    }
+                    else {
+                        // Thực hiện đấu giá đất
+                        auctionProperty(landedTile);
+                    }
+                }
+                else {
+                    std::cout << currentPlayer.getName() << " doesn't have enough money to buy " << landedTile.getName() << std::endl;
+                    // Thực hiện đấu giá đất
+                    auctionProperty(landedTile);
+                }
+            }
+
             // Chuyển lượt người chơi
             nextTurn();
         }
+    }
+}
+
+void Game::auctionProperty(Tile& tile) {
+    std::cout << "\nStarting auction for " << tile.getName() << "!\n" << std::endl;
+    int currentPrice = tile.getHousePrice();  // Giá khởi điểm bằng giá trị ban đầu của ô đất
+    int highestBid = 0;                     // Giá thầu cao nhất hiện tại
+    Player* highestBidder = nullptr;       // Người chơi trả giá cao nhất hiện tại
+    bool biddingContinues = true;          // Biến kiểm soát vòng lặp đấu giá
+
+    // Vòng lặp đấu giá
+    while (biddingContinues) {
+        biddingContinues = false;  // Giả định không có ai trả giá cao hơn
+
+        // Duyệt qua danh sách người chơi
+        for (Player& player : players) {
+            if (player.getState() != PlayerState::Bankrupt && player.getMoney() > highestBid) {  // Chỉ người chơi chưa phá sản và có đủ tiền mới có thể tham gia đấu giá
+                char choice;
+                std::cout << player.getName() << ", do you want to bid higher than $" << highestBid << "? (Y/N): ";
+                std::cin >> choice;
+
+                if (choice == 'Y' || choice == 'y') {
+                    int bid;
+                    std::cout << "Enter your bid (must be higher than $" << highestBid << "): ";
+                    std::cin >> bid;
+
+                    if (bid > highestBid && bid <= player.getMoney()) {
+                        highestBid = bid;
+                        highestBidder = &player;
+                        biddingContinues = true;  // Có người trả giá cao hơn, tiếp tục vòng lặp
+                    }
+                    else {
+                        std::cout << "Invalid bid. Please enter a valid amount." << std::endl;
+                    }
+                }
+            }
+        }
+    }
+
+    // Kết thúc đấu giá
+    if (highestBidder != nullptr) {
+        highestBidder->setMoney(highestBidder->getMoney() - highestBid);  // Trừ tiền người chơi thắng cuộc
+        tile.setOwnerName(highestBidder->getName());                    // Đặt người chơi thắng cuộc làm chủ sở hữu
+        highestBidder->addProperty(&tile);                              // Thêm đất vào danh sách tài sản
+        std::cout << highestBidder->getName() << " won the auction for " << tile.getName() << " with a bid of $" << highestBid << "!" << std::endl;
+    }
+    else {
+        std::cout << "No one bid on " << tile.getName() << "." << std::endl;
     }
 }
 
@@ -253,6 +331,13 @@ void Game::buyHouse(Tile& tile) {
     // Kiểm tra loại ô đất
     if (tile.getTileType() != TileType::PROPERTY) {
         std::cout << "You can only buy a house on regular plots." << std::endl;
+        return;
+    }
+
+    if (tile.getOwnerName() != currentPlayer.getName()) {
+        std::cout << "You do not own this property." << std::endl;
+        // Yêu cầu người chơi mua đất trước
+        std::cout << "You need to buy this property first before buying a house." << std::endl;
         return;
     }
 
