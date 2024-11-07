@@ -4,8 +4,9 @@
 #include <string>
 #include <vector>
 #include <unordered_set>
-
 #include "Tile.h"
+
+using namespace std;
 
 enum class PlayerState { Normal, Bankrupt };
 
@@ -15,13 +16,13 @@ private:
 	float x = 0.0f, y = 0.0f; // Vị trí hiện tại
 	float targetX = 0.0f, targetY = 0.0f; // vị trí mục tiêu
 
-	std::string name;
+	string name;
 	SDL_Texture* houseTexture;
-	std::vector<int> rollHistory;
+	vector<int> rollHistory;
 	int previousRoll = 0;
 	int currentRoll = 0;
 	int money;
-	std::unordered_set<Tile*> properties;
+	unordered_set<Tile*> properties;
 	int position = 0;
 	PlayerState state = PlayerState::Normal;
 	bool isMoving = false;
@@ -35,19 +36,19 @@ private:
 	bool hasReachedTarget() const;
 
 public:
-	explicit Player(const std::string& playerName, int initialMoney);
+	explicit Player(const string& playerName, int initialMoney);
 
 	// Getters
 	SDL_Texture* getSprite() const { return sprite; }
 	float getX() const { return x; }
 	float getY() const { return y; }
-	const std::string& getName() const { return name; }
+	const string& getName() const { return name; }
 	int getMoney() const { return money; }
 	int getPosition() const { return position; }
 	bool getCanRollDice() const { return canRollDice; }
 	int getPreviousRoll() const { return previousRoll; }
 	int getCurrentRoll() const { return currentRoll; }
-	const std::unordered_set<Tile*>& getProperties() const { return properties; }
+	const unordered_set<Tile*>& getProperties() const { return properties; }
 	PlayerState getState() const { return state; }
 	bool getIsMoving() const { return isMoving; }
 	int getTurnsOnLostIsland() const { return turnsOnLostIsland; }
@@ -68,7 +69,7 @@ public:
 	void setCanRollDice(bool canRollDice) { this->canRollDice = canRollDice; }
 	void setPreviousRoll(int previousRoll) { this->previousRoll = previousRoll; }
 	void setCurrentRoll(int currentRoll) { this->currentRoll = currentRoll; }
-	void setProperties(const std::unordered_set<Tile*>& properties) { this->properties = properties; }
+	void setProperties(const unordered_set<Tile*>& properties) { this->properties = properties; }
 	void setState(PlayerState state) { this->state = state; }
 	void setIsMoving(bool isMoving) { this->isMoving = isMoving; }
 	void setOnWorldTour(bool onWorldTour) { this->onWorldTour = onWorldTour; }
@@ -79,17 +80,15 @@ public:
 	void setHouseTexture(SDL_Texture* texture) { houseTexture = texture; }
 
 	// Các phương thức công khai
-	void addRoll(int roll);
-	void printRollHistory() const;
 	int calculateNewPosition(int steps) const;
-	void move(int steps, std::vector<Tile>& board);
+	void move(int steps, vector<Tile>& board);
 	void setTargetPosition(float x, float y);
 	void updateTargetPosition();
-	void updatePosition(float deltaTime, const std::vector<Player>& otherPlayers);
+	void updatePosition(float deltaTime, const vector<Player>& otherPlayers);
 	bool canBuyHouse(const Tile& tile) const;
 	void addProperty(Tile* tile);
 	int countHouses() const;
-	std::vector<Tile*> getOwnedProperties() const;
+	vector<Tile*> getOwnedProperties() const;
 	void clearProperties();
 };
 

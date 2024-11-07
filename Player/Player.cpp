@@ -26,10 +26,6 @@ Player::Player(const std::string& playerName, int initialMoney)
     hasMap(false)
 {}
 
-void Player::addRoll(int roll) {
-    rollHistory.push_back(roll);
-}
-
 void Player::addProperty(Tile* tile) {
     properties.insert(tile);
 }
@@ -46,13 +42,6 @@ bool Player::canBuyHouse(const Tile& tile) const {
     return tile.getTileType() == TileType::PROPERTY && tile.getNumHouses() < MAX_HOUSE;
 }
 
-void Player::printRollHistory() const {
-    for (int roll : rollHistory) {
-        std::cout << roll << " ";
-    }
-    std::cout << std::endl;
-}
-
 int Player::calculateNewPosition(int steps) const {
     return (position + steps + NUM_TILES) % NUM_TILES; // Bàn cờ có 32 ô
 }
@@ -67,25 +56,24 @@ std::vector<Tile*> Player::getOwnedProperties() const {
     return ownedProperties;
 }
 
-void Player::move(int steps, std::vector<Tile>& board){
-    if (canRollDice) {
-        // Lấy ô hiện tại và loại bỏ người chơi khỏi ô đó
-        Tile& oldTile = board[position];
-        oldTile.removePlayer(this);
+void Player::move(int steps, std::vector<Tile>& board) {
+    // Lấy ô hiện tại và loại bỏ người chơi khỏi ô đó
+    Tile& oldTile = board[position];
+    oldTile.removePlayer(this);
 
-        // Di chuyển người chơi đến vị trí mới
-        int newPosition = (position + steps) % board.size();
-        position = newPosition;
-        Tile& targetTile = board[newPosition];
-        setTargetPosition(targetTile.getX(), targetTile.getY());
-        updateTargetPosition();
-        isMoving = true;
-        canRollDice = false;
+    // Di chuyển người chơi đến vị trí mới
+    int newPosition = calculateNewPosition(steps);
+    position = newPosition;
+    Tile& targetTile = board[newPosition];
 
-        // Thêm người chơi vào ô mới
-        Tile& newTile = board[position];
-        newTile.addPlayer(this);
-    }
+    // Cập nhật vị trí đích và trạng thái di chuyển
+    setTargetPosition(targetTile.getX(), targetTile.getY());
+    updateTargetPosition();
+    isMoving = true; // Đặt isMoving = true sau khi cập nhật vị trí đích
+
+    // Thêm người chơi vào ô mới
+    Tile& newTile = board[position];
+    newTile.addPlayer(this);
 }
 
 void Player::setTargetPosition(float x, float y) {
@@ -123,7 +111,6 @@ void Player::updatePosition(float deltaTime, const std::vector<Player>& otherPla
             x = targetX;
             y = targetY;
             isMoving = false;
-            canRollDice = true;
 
             // Kiểm tra va chạm với người chơi khác và điều chỉnh vị trí nếu cần
             for (const Player& other : otherPlayers) {
