@@ -5,7 +5,7 @@
 #include <iostream>
 #include <cmath>
 
-Player::Player(const std::string& playerName, int initialMoney)
+Player::Player(const string& playerName, int initialMoney)
     : name(playerName),
     money(initialMoney),
     sprite(nullptr),
@@ -46,8 +46,8 @@ int Player::calculateNewPosition(int steps) const {
     return (position + steps + NUM_TILES) % NUM_TILES; // Bàn cờ có 32 ô
 }
 
-std::vector<Tile*> Player::getOwnedProperties() const {
-    std::vector<Tile*> ownedProperties;
+vector<Tile*> Player::getOwnedProperties() const {
+    vector<Tile*> ownedProperties;
     for (Tile* tile : properties) { // Duyệt qua danh sách properties của người chơi
         if (tile->getOwnerName() == name) { // Kiểm tra nếu người chơi sở hữu ô đất
             ownedProperties.push_back(tile);
@@ -56,7 +56,7 @@ std::vector<Tile*> Player::getOwnedProperties() const {
     return ownedProperties;
 }
 
-void Player::move(int steps, std::vector<Tile>& board) {
+void Player::move(int steps, vector<Tile>& board) {
     // Lấy ô hiện tại và loại bỏ người chơi khỏi ô đó
     Tile& oldTile = board[position];
     oldTile.removePlayer(this);
@@ -101,20 +101,20 @@ void Player::updateTargetPosition() {
     }
 }
 
-void Player::updatePosition(float deltaTime, const std::vector<Player>& otherPlayers) {
+void Player::updatePosition(float deltaTime, const vector<Player>& otherPlayers) {
     if (isMoving) {
         float dx = targetX - x;
         float dy = targetY - y;
         float distance = sqrt(dx * dx + dy * dy);
 
-        if (distance < PLAYER_SPEED * deltaTime) {
+        if (dx * dx + dy * dy < (PLAYER_SPEED * deltaTime) * (PLAYER_SPEED * deltaTime)) {
             x = targetX;
             y = targetY;
             isMoving = false;
 
             // Kiểm tra va chạm với người chơi khác và điều chỉnh vị trí nếu cần
             for (const Player& other : otherPlayers) {
-                if (&other != this && std::abs(other.x - this->x) < TILE_SIZE * 0.1f && std::abs(other.y - this->y) < TILE_SIZE * 0.1f) {
+                if (&other != this && abs(other.x - this->x) < TILE_SIZE * 0.1f && abs(other.y - this->y) < TILE_SIZE * 0.1f) {
                     this->x += TILE_SIZE * 0.2f; // Tăng khoảng cách x 
                     this->y += TILE_SIZE * 0.2f; // Tăng khoảng cách y
                 }
