@@ -9,6 +9,8 @@
 #include <vector>
 #include <functional>
 
+using namespace std;
+
 class Game;
 
 class Board {
@@ -33,27 +35,27 @@ public:
     void handleWorldsEvent(Player& player);
     void applyTax(Player& player);
 
-    std::vector<Tile>& getBoard() {
+    vector<Tile>& getBoard() {
         return board;
     }
 
-    void setBoard(const std::vector<Tile>& newBoard) {
+    void setBoard(const vector<Tile>& newBoard) {
         board = newBoard;
     }
 
-    std::vector<Tile>& getTiles() {
+    vector<Tile>& getTiles() {
         return tiles;
     }
 
-    void setTiles(const std::vector<Tile>& newTiles) {
+    void setTiles(const vector<Tile>& newTiles) {
         tiles = newTiles;
     }
     
 private:
     const int specialTilePositions[12] = { 0, 8, 16, 24, 12, 20, 28, 4, 14, 18, 25, 30 };
     Game* game;
-    std::vector<Tile> tiles;
-    std::vector<Tile> board;
+    vector<Tile> tiles;
+    vector<Tile> board;
 };
 
 #endif
