@@ -15,7 +15,7 @@ class Board;
 
 class Game {
 public:
-    Game(const std::vector<std::string>& playerNames);
+    Game(const std::vector<std::string>& playerNames);  // Constructor
     ~Game();
 
     void run();

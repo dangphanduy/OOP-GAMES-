@@ -12,6 +12,8 @@
 #include <string>
 #include <functional>
 
+using namespace std;
+
 class Board;
 
 class Game {
@@ -30,36 +32,38 @@ public:
     void update(float deltaTime);
 
     void render();
-    void renderText(const std::string& message, int x, int y, SDL_Color color);
+    void renderText(const string& message, int x, int y, SDL_Color color);
     void renderPlayerInfo();
     void drawPlayer(SDL_Texture* texture, int x, int y);
 
     int rollDice();
     void handleRollDice(Player& currentPlayer);
-    bool hasRolledDoubles();
     void nextTurn(); 
 
+    bool hasRolledDoubles(); 
     void setupChanceEvents();
 
+    void auctionProperty(Tile& tile);
     void buyHouse(Tile& tile);
     void buyBeach(Player& player, Tile& tile);
 
     void sellHouse(Player& player);
-    std::vector<Tile*> getOwnedTilesWithHouses(Player& player);
-    void displayOwnedTiles(Player& player, const std::vector<Tile*>& ownedTiles);
+    vector<Tile*> getOwnedTilesWithHouses(Player& player);
+    void displayOwnedTiles(Player& player, const vector<Tile*>& ownedTiles);
     int getPlayerChoice(size_t numChoices);
     void sellHouseOnTile(Player& player, Tile* tile);
+    void handleBankruptcy(Player& player);
 
-    SDL_Texture* loadTexture(const std::string& path, SDL_Renderer* renderer);
+    SDL_Texture* loadTexture(const string& path, SDL_Renderer* renderer);
 
     // Getters
-    Player& getPlayer(const std::string& name);
-    std::vector<Player>& getPlayers() { return players; }
+    Player& getPlayer(const string& name);
+    vector<Player>& getPlayers() { return players; }
     Board* getBoard() { return board; }
     int getCurrentPlayerIndex() const { return currentPlayerIndex; }
     bool getIsRunning() const { return isRunning; }
     SDL_Renderer* getRenderer() const { return renderer; }
-    const std::vector<std::function<void(Player&, std::vector<Player*>&)>> getChanceEvents() const {
+    const vector<function<void(Player&, vector<Player*>&)>> getChanceEvents() const {
         return chanceEvents;
     }
 
@@ -67,18 +71,20 @@ public:
     void setCurrentPlayerIndex(int currentPlayerIndex) { this->currentPlayerIndex = currentPlayerIndex; }
     void setIsRunning(bool isRunning) { this->isRunning = isRunning; }
     void setRenderer(SDL_Renderer* renderer) { this->renderer = renderer; }
-    void setChanceEvents(const std::vector<std::function<void(Player&, std::vector<Player*>&)>>& newEvents) {
+    void setChanceEvents(const vector<function<void(Player&, vector<Player*>&)>>& newEvents) {
         this->chanceEvents = newEvents;
     }
+    void handleBuyProperty(Player& currentPlayer, Tile& currentTile);
 private:
     TTF_Font* font;
-    std::vector<Player> players;
+    Uint32 turnStartTime; // Biến lưu thời điểm bắt đầu lượt
+    vector<Player> players;
     Board* board;
     int currentPlayerIndex;
     bool isRunning;
-    std::vector<std::function<void(Player&, std::vector<Player*>&)>> chanceEvents;
+    vector<function<void(Player&, vector<Player*>&)>> chanceEvents;
     SDL_Window* window;
     SDL_Renderer* renderer;
 };
 
-#endif  // GAME_H
+#endif

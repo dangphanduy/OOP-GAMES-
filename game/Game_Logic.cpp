@@ -42,7 +42,6 @@ void Game::handleEvents() {
 
 void Game::handleKeyPress(SDL_Keycode key) {
     Player& currentPlayer = players[currentPlayerIndex];
-
     if (key == SDLK_SPACE) {
         handleRollDice(currentPlayer);
     }
@@ -57,6 +56,13 @@ void Game::handleKeyPress(SDL_Keycode key) {
     else if (key == SDLK_l) {
         sellHouse(currentPlayer);
     }
+    else if (key == SDLK_n) {
+        nextTurn();
+    }
+    else if (key == SDLK_e) {
+        Tile& currentTile = board->getBoard()[currentPlayer.getPosition()];
+        handleBuyProperty(currentPlayer, currentTile);
+    }
     else if (key == SDLK_ESCAPE) {
         exit(1);
     }
@@ -64,6 +70,27 @@ void Game::handleKeyPress(SDL_Keycode key) {
 
 void Game::update(float deltaTime) {
     Player& currentPlayer = players[currentPlayerIndex];
+
+    // Kiểm tra thời gian trôi qua
+    Uint32 currentTime = SDL_GetTicks();
+    if (currentTime - turnStartTime >= TURN_TIME_LIMIT) {
+        std::cout << "Time's up! Automatically switching to the next player." << std::endl;
+
+        // Nếu người chơi chưa đổ xúc xắc, tự động đổ xúc xắc cho họ
+        if (!currentPlayer.getIsMoving() && currentPlayer.getCanRollDice()) {
+            int diceRoll = rollDice();
+            currentPlayer.move(diceRoll, board->getBoard());
+
+            // Cập nhật trạng thái di chuyển của người chơi
+            currentPlayer.setIsMoving(true);
+            currentPlayer.setCanRollDice(false);
+        }
+        else {
+            // Chuyển lượt nếu người chơi đã đổ xúc xắc
+            nextTurn();
+        }
+        return;
+    }
 
     // Nếu player di chuyển, cập nhật vị trí của họ
     if (currentPlayer.getIsMoving()) {
@@ -75,61 +102,6 @@ void Game::update(float deltaTime) {
             // Kích hoạt sự kiện nếu có
             Tile& landedTile = board->getBoard()[currentPlayer.getPosition()];
             landedTile.triggerOnLand(&currentPlayer);
-
-            // Kiểm tra xem ô đất có thuộc sở hữu của người chơi khác hay không
-            if (landedTile.getTileType() == TileType::PROPERTY &&
-                !landedTile.getOwnerName().empty() &&
-                landedTile.getOwnerName() != currentPlayer.getName()) {
-
-                // Tính toán số tiền cần trả (ví dụ: 10% giá trị ô đất)
-                int rent = landedTile.getHousePrice() * 0.1;
-
-                // Trừ tiền người chơi hiện tại
-                currentPlayer.setMoney(currentPlayer.getMoney() - rent);
-
-                // Cộng tiền cho chủ sở hữu
-                Player& owner = getPlayer(landedTile.getOwnerName());
-                owner.setMoney(owner.getMoney() + rent);
-
-                std::cout << currentPlayer.getName() << " paid $" << rent << " to " << owner.getName() << " for landing on " << landedTile.getName() << std::endl;
-            }
-
-            // Kiểm tra xem người chơi có bị phá sản sau khi di chuyển hay không
-            if (currentPlayer.getMoney() <= 0) {
-                currentPlayer.setState(PlayerState::Bankrupt);
-                std::cout << currentPlayer.getName() << " is bankrupt!" << std::endl;
-                handleBankruptcy(currentPlayer);
-            }
-
-            // Nếu ô đất chưa có người sở hữu và là loại PROPERTY
-            if (landedTile.getTileType() == TileType::PROPERTY && landedTile.getOwnerName().empty()) {
-                // Hiển thị thông tin ô đất và giá tiền
-                std::cout << landedTile.getName() << " is available for purchase for $" << landedTile.getHousePrice() << std::endl;
-
-                // Xử lý mua đất hoặc đấu giá
-                if (currentPlayer.getMoney() >= landedTile.getHousePrice()) {
-                    char choice;
-                    std::cout << "Do you want to buy " << landedTile.getName() << "? (Y/N): ";
-                    std::cin >> choice;
-
-                    if (choice == 'Y' || choice == 'y') {
-                        // Trừ tiền người chơi và đặt người chơi làm chủ sở hữu
-                        currentPlayer.setMoney(currentPlayer.getMoney() - landedTile.getHousePrice());
-                        landedTile.setOwnerName(currentPlayer.getName());
-                        currentPlayer.addProperty(&landedTile); // Thêm đất vào danh sách tài sản
-                        std::cout << currentPlayer.getName() << " bought " << landedTile.getName() << std::endl;
-                    }
-                    else {
-                        // Thực hiện đấu giá đất
-                        auctionProperty(landedTile);
-                    }
-                }
-                else {
-                    std::cout << currentPlayer.getName() << " doesn't have enough money to buy " << landedTile.getName() << std::endl;
-                    // Thực hiện đấu giá đất
-                    auctionProperty(landedTile);
-                }
-            }
 
             // Kiểm tra xem người chơi có đang ở trên Lost Island hay không
             if (currentPlayer.getIsOnLostIsland()) {
@@ -149,8 +121,27 @@ void Game::update(float deltaTime) {
                 }
             }
 
-            // Chuyển lượt người chơi
-            nextTurn();
+            // Kiểm tra xem ô đất có thuộc sở hữu của người chơi khác hay không
+            if (landedTile.getTileType() == TileType::PROPERTY &&
+                !landedTile.getOwnerName().empty() &&
+                landedTile.getOwnerName() != currentPlayer.getName()) {
+
+                // Tính toán số tiền cần trả (ví dụ: 10% giá trị ô đất)
+                int rent = landedTile.getHousePrice() * 0.1;
+                // Trừ tiền người chơi hiện tại
+                currentPlayer.setMoney(currentPlayer.getMoney() - rent);
+                // Cộng tiền cho chủ sở hữu
+                Player& owner = getPlayer(landedTile.getOwnerName());
+                owner.setMoney(owner.getMoney() + rent);
+
+                std::cout << currentPlayer.getName() << " paid $" << rent << " to " << owner.getName() << " for landing on " << landedTile.getName() << std::endl;
+            }
+
+            // Kiểm tra xem người chơi có bị phá sản sau khi di chuyển hay không
+            if (currentPlayer.getMoney() <= 0) {
+                currentPlayer.setState(PlayerState::Bankrupt);
+                std::cout << currentPlayer.getName() << " is bankrupt!" << std::endl;
+            }
         }
     }
 }
@@ -225,12 +216,12 @@ void Game::handleRollDice(Player& currentPlayer) {
             int diceRoll = rollDice();
             std::cout << "\n" << currentPlayer.getName() << " rolled a " << diceRoll << std::endl;
             currentPlayer.move(diceRoll, board->getBoard());
+            currentPlayer.setIsMoving(true);
+            currentPlayer.setCanRollDice(false);
         }
-        currentPlayer.setIsMoving(true);
-        currentPlayer.setCanRollDice(false);
     }
     else {
-        std::cout << currentPlayer.getName() << " is still moving or cannot roll dice yet." << std::endl;
+        std::cout << currentPlayer.getName() << " has already rolled the dice." << std::endl;
     }
 }
 
@@ -241,6 +232,8 @@ void Game::nextTurn() {
 
     Player& currentPlayer = players[currentPlayerIndex];
     std::cout << currentPlayer.getName() << "'s turn." << std::endl;
+    currentPlayer.setCanRollDice(true);
+    turnStartTime = SDL_GetTicks(); // Reset thời gian bắt đầu lượt
 }
 
 bool Game::hasRolledDoubles() {
@@ -342,6 +335,32 @@ void Game::setupChanceEvents() {
             player.setMoney(player.getMoney() + 100);
         },
     };
+}
+
+void Game::handleBuyProperty(Player& currentPlayer, Tile& currentTile) {
+    if (currentTile.getTileType() == TileType::PROPERTY && currentTile.getOwnerName().empty()) {
+        // Hiển thị thông tin ô đất và giá tiền
+        std::cout << currentTile.getName() << " is available for purchase for $" << currentTile.getHousePrice() << std::endl;
+
+        if (currentPlayer.getMoney() >= currentTile.getHousePrice()) {
+            char choice;
+            std::cout << "Do you want to buy " << currentTile.getName() << "? (Y/N): ";
+            std::cin >> choice;
+            if (choice == 'Y' || choice == 'y') {
+                // Trừ tiền người chơi và đặt người chơi làm chủ sở hữu
+                currentPlayer.setMoney(currentPlayer.getMoney() - currentTile.getHousePrice());
+                currentTile.setOwnerName(currentPlayer.getName());
+                currentPlayer.addProperty(&currentTile); // Thêm đất vào danh sách tài sản
+                std::cout << currentPlayer.getName() << " bought " << currentTile.getName() << std::endl;
+            }
+        }
+        else {
+            std::cout << currentPlayer.getName() << " doesn't have enough money to buy " << currentTile.getName() << std::endl;
+        }
+    }
+    else {
+        std::cout << "You cannot buy this property." << std::endl;
+    }
 }
 
 void Game::buyHouse(Tile& tile) {
