@@ -41,12 +41,12 @@ void Game::initSDL() {
     }
 }
 
-SDL_Texture* Game::loadTexture(const std::string& path, SDL_Renderer* renderer) {
+SDL_Texture* Game::loadTexture(const string& path, SDL_Renderer* renderer) {
     SDL_Texture* texture = nullptr;
     SDL_Surface* loadedSurface = IMG_Load(path.c_str());
 
     if (loadedSurface == nullptr) {
-        std::cerr << "Unable to load image " << path << "! SDL_image Error: " << IMG_GetError() << std::endl;
+        cerr << "Unable to load image " << path << "! SDL_image Error: " << IMG_GetError() << endl;
         // Thêm texture mặc định nếu có
         texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 100, 100); // Texture mặc định kích thước 100x100
     }
@@ -97,7 +97,7 @@ void Game::cleanup() {
 void Game::drawPlayer(SDL_Texture* texture, int x, int y) {
     SDL_Rect playerRect = { x, y, spriteWidth, spriteHeight };
     if (SDL_RenderCopy(renderer, texture, nullptr, &playerRect) != 0) {
-        std::cerr << "SDL_RenderCopy error: " << SDL_GetError() << std::endl;
+        cerr << "SDL_RenderCopy error: " << SDL_GetError() << endl;
     }
 }
 
@@ -110,10 +110,10 @@ void Game::render() {
     SDL_RenderPresent(renderer);
 }
 
-void Game::renderText(const std::string& message, int x, int y, SDL_Color color) {
+void Game::renderText(const string& message, int x, int y, SDL_Color color) {
     SDL_Surface* surface = TTF_RenderText_Solid(font, message.c_str(), color);
     if (!surface) {
-        std::cerr << "Error rendering text: " << TTF_GetError() << std::endl;
+        cerr << "Error rendering text: " << TTF_GetError() << endl;
         return;
     }
     SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
@@ -147,7 +147,7 @@ void Game::renderPlayerInfo() {
 
         if (i == currentPlayerIndex) {
             Uint32 timeLeft = TURN_TIME_LIMIT - (SDL_GetTicks() - turnStartTime);
-            std::string timeLeftText = "Time Left: " + std::to_string(timeLeft / 1000) + "s"; // Hiển thị thời gian theo giây
+            string timeLeftText = "Time Left: " + to_string(timeLeft / 1000) + "s"; // Hiển thị thời gian theo giây
             renderText(timeLeftText, tableX + 5, tableY + (i + 5) * cellHeight + 5, textColor); // Hiển thị dưới các thông tin khác
         }
 
@@ -160,17 +160,17 @@ void Game::renderPlayerInfo() {
         renderText(players[i].getName(), tableX + 5, tableY + i * cellHeight + 5, textColor);
 
         // Hiển thị tiền của người chơi
-        std::string moneyText = "Money: $" + std::to_string(players[i].getMoney());
+        string moneyText = "Money: $" + to_string(players[i].getMoney());
         renderText(moneyText, tableX + 5, tableY + (i + 1) * cellHeight + 5, textColor);
         // Hiển thị vị trí của người chơi
-        std::string positionText = "Position: " + std::to_string(players[i].getPosition());
+        string positionText = "Position: " + to_string(players[i].getPosition());
         renderText(positionText, tableX + 5, tableY + (i + 2) * cellHeight + 5, textColor);
         // Hiển thị số nhà người chơi sở hữu
         int numHouses = 0;
         for (const Tile* tile : players[i].getOwnedProperties()) {
             numHouses += tile->getNumHouses();
         }
-        std::string houseText = "Houses: " + std::to_string(numHouses);
+        string houseText = "Houses: " + to_string(numHouses);
         renderText(houseText, tableX + 5, tableY + (i + 3) * cellHeight + 5, textColor);
         // Hiển thị số bãi biển người chơi sở hữu
         int numBeaches = 0;
@@ -179,7 +179,7 @@ void Game::renderPlayerInfo() {
                 numBeaches++;
             }
         }
-        std::string beachText = "Beaches: " + std::to_string(numBeaches);
+        string beachText = "Beaches: " + to_string(numBeaches);
         renderText(beachText, tableX + 5, tableY + (i + 4) * cellHeight + 5, textColor);
     }
 }

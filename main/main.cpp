@@ -39,7 +39,7 @@ void displayInstructions() {
 int main(int argc, char* argv[]) {
     displayInstructions();
 
-    std::vector<std::string> playerNames = getPlayerNames();
+    vector<string> playerNames = getPlayerNames();
 
     Game game(playerNames);
     game.run();
