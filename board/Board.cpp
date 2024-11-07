@@ -8,14 +8,16 @@
 #include "Game.h"
 #include "TileBuilder.h"
 
+using namespace std;
+
 Board::Board(Game* game) : game(game) {}
 // Xử lý các sự kiện
 void Board::handleChanceEvent(Player& player) {
-    std::random_device rd;
-    std::mt19937 gen{ rd() };
-    std::uniform_int_distribution<> dis(0, game->getChanceEvents().size() - 1);
+    random_device rd;
+    mt19937 gen{ rd() };
+    uniform_int_distribution<> dis(0, game->getChanceEvents().size() - 1);
     int eventIndex = dis(gen);
-    std::vector<Player*> playerPointers;
+    vector<Player*> playerPointers;
     for (auto& player : game->getPlayers()) {
         playerPointers.push_back(&player);
     }
@@ -23,29 +25,29 @@ void Board::handleChanceEvent(Player& player) {
 }
 
 void Board::handleWorldsEvent(Player& player) {
-    std::cout << player.getName() << " landed on Worlds!" << std::endl;
+    cout << player.getName() << " landed on Worlds!" << endl;
 
     // Lấy danh sách các ô đất mà người chơi sở hữu
     const auto ownedProperties = player.getOwnedProperties();
 
     // Nếu người chơi không sở hữu ô đất nào
     if (ownedProperties.empty()) {
-        std::cout << "You don't own any properties yet." << std::endl;
+        cout << "You don't own any properties yet." << endl;
         return;
     }
 
     // Hiển thị danh sách các ô đất
-    std::cout << "Choose a property to increase its value:" << std::endl;
+    cout << "Choose a property to increase its value:" << endl;
     for (size_t i = 0; i < ownedProperties.size(); ++i) {
-        std::cout << i + 1 << ". " << ownedProperties[i]->getName() << std::endl;
+        cout << i + 1 << ". " << ownedProperties[i]->getName() << endl;
     }
 
     // Nhận lựa chọn của người chơi
     int choice;
-    if (!(std::cin >> choice)) { // Kiểm tra xem người chơi có nhập số nguyên hay không
-        std::cout << "Invalid choice." << std::endl;
-        std::cin.clear(); // Xóa lỗi
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Xóa bộ đệm
+    if (!(cin >> choice)) { // Kiểm tra xem người chơi có nhập số nguyên hay không
+        cout << "Invalid choice." << endl;
+        cin.clear(); // Xóa lỗi
+        cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Xóa bộ đệm
         return;
     }
 
@@ -55,11 +57,11 @@ void Board::handleWorldsEvent(Player& player) {
         selectedTile->setValueMultiplier(selectedTile->getValueMultiplier() * 2); // Tăng hệ số nhân lên gấp đôi
         player.setWorldsUsed(player.getWorldsUsed() + 1); // Tăng số lần sử dụng "Worlds"
 
-        std::cout << "The value of " << selectedTile->getName() << " has been doubled!" << std::endl;
-        std::cout << "Multiplier: " << selectedTile->getValueMultiplier() << std::endl;
+        cout << "The value of " << selectedTile->getName() << " has been doubled!" << endl;
+        cout << "Multiplier: " << selectedTile->getValueMultiplier() << endl;
     }
     else {
-        std::cout << "Invalid choice." << std::endl;
+        cout << "Invalid choice." << endl;
     }
 }
 
@@ -87,8 +89,8 @@ void Board::applyTax(Player& player) {
         int taxAmount = 0.1 * totalHouseValue;
         player.setMoney(player.getMoney() - taxAmount);
 
-        std::cout << player.getName() << " paid $" << taxAmount << " in taxes at "
-            << taxTile->getName() << std::endl;
+        cout << player.getName() << " paid $" << taxAmount << " in taxes at "
+            << taxTile->getName() << endl;
     }
 }
 // Tính toán vị trí cho từng ô
@@ -143,7 +145,7 @@ void Board::setupSpecialTiles() {
         .withType(TileType::LOST_ISLAND)
         .withOnLand([this](Player* player) { 
         player->setIsOnLostIsland(true);
-        std::cout << player->getName() << " is stranded on Lost Island!" << std::endl; })
+        cout << player->getName() << " is stranded on Lost Island!" << endl; })
         .build();
     board[16] = TileBuilder()
         .withName("Worlds")
@@ -157,7 +159,7 @@ void Board::setupSpecialTiles() {
         .withType(TileType::WORLD_TOUR)
         .withOnLand([this](Player* player) { 
         player->setOnWorldTour(true);
-        std::cout << player->getName() << " activated World Tour!" << std::endl;
+        cout << player->getName() << " activated World Tour!" << endl;
             })
         .build();
     board[30] = TileBuilder()
@@ -193,11 +195,11 @@ void Board::setupSpecialTiles() {
 
     //Các ô đất thường
     struct PropertyInfo {
-        std::string name;
+        string name;
         int cost;
         ColorGroup colorGroup;
     };
-    std::vector<PropertyInfo> properties = {
+    vector<PropertyInfo> properties = {
         {"GRANADA", 120, ColorGroup::BROWN},
         {"SEVILLE", 120, ColorGroup::BROWN},
         {"MADRID", 150, ColorGroup::BROWN},
