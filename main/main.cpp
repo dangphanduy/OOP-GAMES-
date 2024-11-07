@@ -13,6 +13,7 @@ void displayInstructions() {
     cout << "| b    | Mua bai bien                                                 |\n";
     cout << "| h    | Mua nha                                                      |\n";
     cout << "| l    | Ban nha                                                      |\n";
+    cout << "| n    | Ket thuc luot                                                |\n";
     cout << "| ESC  | Thoat khoi tro choi                                          |\n";
     cout << "========================================================================\n";
     cout << "\nCac o dac biet:\n";

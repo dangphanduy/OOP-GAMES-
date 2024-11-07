@@ -34,5 +34,7 @@ const int BEACH_COST = 200;
 // Số nhà tối đa
 const int MAX_HOUSE = 4;
 
+const float TURN_TIME_LIMIT = 30000; // 30 giây
+
 #endif
 

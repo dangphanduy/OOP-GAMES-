@@ -145,6 +145,12 @@ void Game::renderPlayerInfo() {
         int tableX = tableXPositions[i];
         int tableY = tableYPositions[i];
 
+        if (i == currentPlayerIndex) {
+            Uint32 timeLeft = TURN_TIME_LIMIT - (SDL_GetTicks() - turnStartTime);
+            std::string timeLeftText = "Time Left: " + std::to_string(timeLeft / 1000) + "s"; // Hiển thị thời gian theo giây
+            renderText(timeLeftText, tableX + 5, tableY + (i + 5) * cellHeight + 5, textColor); // Hiển thị dưới các thông tin khác
+        }
+
         // Vẽ hình chữ nhật cho tên người chơi
         SDL_Rect nameRect = { tableX, tableY + i * cellHeight, cellWidth, cellHeight };
         SDL_SetRenderDrawColor(renderer, tableColor.r, tableColor.g, tableColor.b, tableColor.a);
