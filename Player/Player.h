@@ -90,6 +90,7 @@ public:
 	void addProperty(Tile* tile);
 	int countHouses() const;
 	std::vector<Tile*> getOwnedProperties() const;
+	void clearProperties();
 };
 
 #endif
