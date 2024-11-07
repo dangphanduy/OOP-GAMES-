@@ -18,7 +18,7 @@ class Board;
 
 class Game {
 public:
-    Game(const std::vector<std::string>& playerNames); 
+    Game(const vector<string>& playerNames); 
     ~Game();
 
     void run();
@@ -78,6 +78,7 @@ public:
 private:
     TTF_Font* font;
     Uint32 turnStartTime; // Biến lưu thời điểm bắt đầu lượt
+    bool autoRollDice = false;
     vector<Player> players;
     Board* board;
     int currentPlayerIndex;

@@ -9,7 +9,7 @@
 
 using namespace std;
 
-Game::Game(const std::vector<std::string>& playerNames) : currentPlayerIndex(0) {
+Game::Game(const vector<string>& playerNames) : currentPlayerIndex(0) {
     initSDL();
     board = new Board(this); // Khởi tạo Board và truyền con trỏ đến Game
     board->createBoard(); // Gọi phương thức tạo bảng
@@ -27,8 +27,8 @@ Game::~Game() {
 }
 
 void Game::initPlayers() {
-    std::vector<std::string> playerTextures = { "Player1.png", "Player2.png", "Player3.png", "Player4.png" };
-    std::vector<std::string> houseTextures = { HOUSE1_TEXTURE_PATH, HOUSE2_TEXTURE_PATH, HOUSE3_TEXTURE_PATH, HOUSE4_TEXTURE_PATH };
+    vector<string> playerTextures = { "Player1.png", "Player2.png", "Player3.png", "Player4.png" };
+    vector<string> houseTextures = { HOUSE1_TEXTURE_PATH, HOUSE2_TEXTURE_PATH, HOUSE3_TEXTURE_PATH, HOUSE4_TEXTURE_PATH };
     int startingPositions = 0; // Vị trí bắt đầu
 
     for (int i = 0; i < players.size(); ++i) {
@@ -47,7 +47,7 @@ void Game::initPlayers() {
     }
 }
 
-Player& Game::getPlayer(const std::string& name) {
+Player& Game::getPlayer(const string& name) {
     for (Player& player : players) {
         if (player.getName() == name) {
             return player;
