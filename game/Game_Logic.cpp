@@ -94,6 +94,25 @@ void Game::update(float deltaTime) {
                 }
             }
 
+            // Kiểm tra xem ô đất có thuộc sở hữu của người chơi khác hay không
+            Tile& landedTile = board->getBoard()[currentPlayer.getPosition()];
+            if (landedTile.getTileType() == TileType::PROPERTY &&
+                !landedTile.getOwnerName().empty() &&
+                landedTile.getOwnerName() != currentPlayer.getName()) {
+
+                // Tính toán số tiền cần trả (ví dụ: 10% giá trị ô đất)
+                int rent = landedTile.getHousePrice() * 0.1;
+
+                // Trừ tiền người chơi hiện tại
+                currentPlayer.setMoney(currentPlayer.getMoney() - rent);
+
+                // Cộng tiền cho chủ sở hữu
+                Player& owner = getPlayer(landedTile.getOwnerName());
+                owner.setMoney(owner.getMoney() + rent);
+
+                std::cout << currentPlayer.getName() << " paid $" << rent << " to " << owner.getName() << " for landing on " << landedTile.getName() << std::endl;
+            }
+
             // Kiểm tra xem người chơi có bị phá sản sau khi di chuyển hay không
             if (currentPlayer.getMoney() <= 0) {
                 currentPlayer.setState(PlayerState::Bankrupt);
