@@ -76,26 +76,7 @@ void Game::update(float deltaTime) {
             Tile& landedTile = board->getBoard()[currentPlayer.getPosition()];
             landedTile.triggerOnLand(&currentPlayer);
 
-            // Kiểm tra xem người chơi có đang ở trên Lost Island hay không
-            if (currentPlayer.getIsOnLostIsland()) {
-                currentPlayer.setTurnsOnLostIsland(currentPlayer.getTurnsOnLostIsland() + 1);
-                std::cout << currentPlayer.getName() << " is stuck on Lost Island for "
-                    << currentPlayer.getTurnsOnLostIsland() << " turns." << std::endl;
-
-                // Kiểm tra điều kiện để thoát khỏi đảo
-                if (currentPlayer.getTurnsOnLostIsland() >= 3 || hasRolledDoubles()) {
-                    currentPlayer.setIsOnLostIsland(false);
-                    currentPlayer.setTurnsOnLostIsland(0);
-                    std::cout << currentPlayer.getName() << " escapes Lost Island!" << std::endl;
-                }
-                else {
-                    // Nếu chưa thoát khỏi đảo, kết thúc lượt
-                    return;
-                }
-            }
-
             // Kiểm tra xem ô đất có thuộc sở hữu của người chơi khác hay không
-            Tile& landedTile = board->getBoard()[currentPlayer.getPosition()];
             if (landedTile.getTileType() == TileType::PROPERTY &&
                 !landedTile.getOwnerName().empty() &&
                 landedTile.getOwnerName() != currentPlayer.getName()) {
@@ -117,6 +98,7 @@ void Game::update(float deltaTime) {
             if (currentPlayer.getMoney() <= 0) {
                 currentPlayer.setState(PlayerState::Bankrupt);
                 std::cout << currentPlayer.getName() << " is bankrupt!" << std::endl;
+                handleBankruptcy(currentPlayer);
             }
 
             // Nếu ô đất chưa có người sở hữu và là loại PROPERTY
@@ -146,6 +128,24 @@ void Game::update(float deltaTime) {
                     std::cout << currentPlayer.getName() << " doesn't have enough money to buy " << landedTile.getName() << std::endl;
                     // Thực hiện đấu giá đất
                     auctionProperty(landedTile);
+                }
+            }
+
+            // Kiểm tra xem người chơi có đang ở trên Lost Island hay không
+            if (currentPlayer.getIsOnLostIsland()) {
+                currentPlayer.setTurnsOnLostIsland(currentPlayer.getTurnsOnLostIsland() + 1);
+                std::cout << currentPlayer.getName() << " is stuck on Lost Island for "
+                    << currentPlayer.getTurnsOnLostIsland() << " turns." << std::endl;
+
+                // Kiểm tra điều kiện để thoát khỏi đảo
+                if (currentPlayer.getTurnsOnLostIsland() >= 3 || hasRolledDoubles()) {
+                    currentPlayer.setIsOnLostIsland(false);
+                    currentPlayer.setTurnsOnLostIsland(0);
+                    std::cout << currentPlayer.getName() << " escapes Lost Island!" << std::endl;
+                }
+                else {
+                    // Nếu chưa thoát khỏi đảo, kết thúc lượt
+                    return;
                 }
             }
 
@@ -345,7 +345,7 @@ void Game::setupChanceEvents() {
 }
 
 void Game::buyHouse(Tile& tile) {
-    Player& currentPlayer = players[currentPlayerIndex]; // Thay đổi cách truy cập players
+    Player& currentPlayer = players[currentPlayerIndex];
 
     // Kiểm tra loại ô đất
     if (tile.getTileType() != TileType::PROPERTY) {
@@ -511,4 +511,22 @@ void Game::sellHouseOnTile(Player& player, Tile* tile) {
     else {
         std::cout << "No houses to sell on " << tile->getName() << std::endl;
     }
+}
+
+void Game::handleBankruptcy(Player& player) {
+    // Lấy danh sách tài sản của người chơi
+    std::unordered_set<Tile*> properties = player.getProperties();
+
+    // Duyệt qua danh sách tài sản và đặt ownerName thành rỗng
+    for (Tile* property : properties) {
+        property->setOwnerName("");
+        property->setNumHouses(0); // Reset số lượng nhà trên ô đất
+    }
+
+    // Xóa toàn bộ tài sản của người chơi
+    player.clearProperties();
+}
+
+void Player::clearProperties() {
+    properties.clear(); // Xóa tất cả các phần tử trong vector properties
 }
