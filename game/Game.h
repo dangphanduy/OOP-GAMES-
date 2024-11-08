@@ -25,7 +25,6 @@ public:
     void initSDL();
     void initPlayers();
     void cleanup();
-    void quitGame();
 
     void handleEvents();
     void handleKeyPress(SDL_Keycode key);
@@ -53,6 +52,7 @@ public:
     int getPlayerChoice(size_t numChoices);
     void sellHouseOnTile(Player& player, Tile* tile);
     void handleBankruptcy(Player& player);
+    void checkAndHandleBankruptcy(Player& player);
 
     SDL_Texture* loadTexture(const string& path, SDL_Renderer* renderer);
 

@@ -116,7 +116,7 @@ void Game::update(float deltaTime) {
                     cout << currentPlayer.getName() << " escapes Lost Island!" << endl;
                 }
                 else {
-                    // Nếu chưa thoát khỏi đảo, kết thúc lượt
+                    nextTurn();
                     return;
                 }
             }
@@ -188,6 +188,7 @@ void Game::auctionProperty(Tile& tile) {
         tile.setOwnerName(highestBidder->getName());                    // Đặt người chơi thắng cuộc làm chủ sở hữu
         highestBidder->addProperty(&tile);                              // Thêm đất vào danh sách tài sản
         cout << highestBidder->getName() << " won the auction for " << tile.getName() << " with a bid of $" << highestBid << "!" << endl;
+        checkAndHandleBankruptcy(*highestBidder);
     }
     else {
         cout << "No one bid on " << tile.getName() << "." << endl;
@@ -207,18 +208,15 @@ int Game::rollDice() {
 }
 
 void Game::handleRollDice(Player& currentPlayer) {
-    if (!currentPlayer.getIsMoving() && currentPlayer.getCanRollDice()) {
-        if (currentPlayer.getOnWorldTour()) {
-            cout << currentPlayer.getName() << " is using World Tour to choose a destination." << endl;
-            currentPlayer.move(0, board->getBoard());
-        }
-        else {
-            int diceRoll = rollDice();
-            cout << "\n" << currentPlayer.getName() << " rolled a " << diceRoll << endl;
-            currentPlayer.move(diceRoll, board->getBoard());
-            currentPlayer.setIsMoving(true);
-            currentPlayer.setCanRollDice(false);
-        }
+    if (currentPlayer.getIsOnLostIsland()) { // Kiểm tra nếu người chơi đang ở trên Lost Island
+        cout << currentPlayer.getName() << " is stuck on Lost Island and cannot roll the dice." << endl;
+    }
+    else if (!currentPlayer.getIsMoving() && currentPlayer.getCanRollDice()) {
+        int diceRoll = rollDice();
+        cout << "\n" << currentPlayer.getName() << " rolled a " << diceRoll << endl;
+        currentPlayer.move(diceRoll, board->getBoard());
+        currentPlayer.setIsMoving(true);
+        currentPlayer.setCanRollDice(false);
     }
     else {
         cout << currentPlayer.getName() << " has already rolled the dice." << endl;
@@ -272,6 +270,7 @@ void Game::setupChanceEvents() {
         [=](Player& player, vector<Player*>& players) {
             cout << player.getName() << " draws a Chance card: Pay fine of 50." << endl;
             player.setMoney(player.getMoney() - 50);
+            checkAndHandleBankruptcy(player);
         },
         [=](Player& player, vector<Player*>& players) {
             cout << player.getName() << " draws a Chance card: Happy Birthday!" << endl;
@@ -298,7 +297,6 @@ void Game::setupChanceEvents() {
             player.setPosition(newPosition);
             player.updateTargetPosition();
             player.setTargetPosition(player.getX(), player.getY()); // Bắt đầu di chuyển đến vị trí mới
-
             cout << player.getName() << " moved back to " << player.getPosition() << endl;
         },
         [=](Player& player, vector<Player*>& players) {
@@ -349,9 +347,13 @@ void Game::handleBuyProperty(Player& currentPlayer, Tile& currentTile) {
             if (choice == 'Y' || choice == 'y') {
                 // Trừ tiền người chơi và đặt người chơi làm chủ sở hữu
                 currentPlayer.setMoney(currentPlayer.getMoney() - currentTile.getHousePrice());
+                checkAndHandleBankruptcy(currentPlayer);
                 currentTile.setOwnerName(currentPlayer.getName());
                 currentPlayer.addProperty(&currentTile); // Thêm đất vào danh sách tài sản
                 cout << currentPlayer.getName() << " bought " << currentTile.getName() << endl;
+            }
+            else {
+                auctionProperty(currentTile);
             }
         }
         else {
@@ -399,6 +401,7 @@ void Game::buyHouse(Tile& tile) {
 
         if (choice == 'Y' || choice == 'y') {
             currentPlayer.setMoney(currentPlayer.getMoney() - tile.getHousePrice());
+            checkAndHandleBankruptcy(currentPlayer);
             tile.setNumHouses(tile.getNumHouses() + 1);
             cout << "You have bought a house in " << tile.getName() << "." << endl;
         }
@@ -433,6 +436,7 @@ void Game::buyBeach(Player& player, Tile& tile) {
 
             if (choice == 'Y' || choice == 'y') {
                 player.setMoney(player.getMoney() - BEACH_COST);
+                checkAndHandleBankruptcy(player);
                 tile.setOwnerName(player.getName());
                 player.addProperty(&tile);
                 cout << player.getName() << " bought the beach." << endl;
@@ -529,6 +533,14 @@ void Game::sellHouseOnTile(Player& player, Tile* tile) {
     }
     else {
         cout << "No houses to sell on " << tile->getName() << endl;
+    }
+}
+
+void Game::checkAndHandleBankruptcy(Player& player) {
+    if (player.getMoney() <= 0) {
+        player.setState(PlayerState::Bankrupt);
+        cout << player.getName() << " is bankrupt!" << endl;
+        handleBankruptcy(player);
     }
 }
 
