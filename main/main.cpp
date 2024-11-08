@@ -21,7 +21,7 @@ void displayInstructions() {
     cout << "1. Bat dau:  Nhan tien khi di qua.\n";
     cout << "2. Dao Hoang (Lost Island) : bi mac ket trong 3 luot hoac cho den khi do xuc xac duoc doi.\n";
     cout << "3. Worlds:  Nhan doi gia tri cua mot o dat ban so huu.\n";
-    cout << "4. Du lich vong quanh the gioi: Chon mot o dat ma ban so huu de di chuyen den.\n";
+    cout << "4. Free Parking: Khong co tac dung nao ca, ngoai lam dep.\n";
     cout << "5. Co hoi:  Rut mot the bai co hoi.\n";
     cout << "6. Thue:  Tra thue dua tren tong gia tri nha cua ban.\n";
     cout << "--------------------------------------------\n";
