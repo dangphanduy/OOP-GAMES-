@@ -92,6 +92,7 @@ void Board::applyTax(Player& player) {
         cout << player.getName() << " paid $" << taxAmount << " in taxes at "
             << taxTile->getName() << endl;
     }
+    game->checkAndHandleBankruptcy(player);
 }
 // Tính toán vị trí cho từng ô
 void Board::calculateTilePosition(int i, int& x, int& y) {
@@ -155,12 +156,8 @@ void Board::setupSpecialTiles() {
             })
         .build();
     board[24] = TileBuilder()
-        .withName("World Tour")
-        .withType(TileType::WORLD_TOUR)
-        .withOnLand([this](Player* player) { 
-        player->setOnWorldTour(true);
-        cout << player->getName() << " activated World Tour!" << endl;
-            })
+        .withName("Free Parking")
+        .withType(TileType::FREE_PARKING)
         .build();
     board[30] = TileBuilder()
         .withName("TAX")
@@ -291,7 +288,7 @@ void Board::renderBoards() {
             case TileType::LOST_ISLAND:
                 SDL_SetRenderDrawColor(game->getRenderer(), 0, 206, 209, 255);  // Xanh lá
                 break;
-            case TileType::WORLD_TOUR:
+            case TileType::FREE_PARKING:
                 SDL_SetRenderDrawColor(game->getRenderer(), 128, 128, 128, 255);  // Màu xám
                 break;
             case TileType::WORLDS:
