@@ -97,7 +97,6 @@ void Game::update(float deltaTime) {
         currentPlayer.updatePosition(deltaTime, players);
         // Kiểm tra xem player đã đến đích chưa
         if (!currentPlayer.getIsMoving()) {
-            cout << currentPlayer.getName() << " has reached the target position." << endl;
 
             // Kích hoạt sự kiện nếu có
             Tile& landedTile = board->getBoard()[currentPlayer.getPosition()];
@@ -126,8 +125,8 @@ void Game::update(float deltaTime) {
                 !landedTile.getOwnerName().empty() &&
                 landedTile.getOwnerName() != currentPlayer.getName()) {
 
-                // Tính toán số tiền cần trả (ví dụ: 10% giá trị ô đất)
-                int rent = landedTile.getHousePrice() * 0.1;
+                // Tính toán số tiền cần trả
+                int rent = landedTile.getHousePrice() * 0.2;
                 // Trừ tiền người chơi hiện tại
                 currentPlayer.setMoney(currentPlayer.getMoney() - rent);
                 // Cộng tiền cho chủ sở hữu
@@ -136,17 +135,13 @@ void Game::update(float deltaTime) {
 
                 cout << currentPlayer.getName() << " paid $" << rent << " to " << owner.getName() << " for landing on " << landedTile.getName() << endl;
             }
-
-            // Kiểm tra xem người chơi có bị phá sản sau khi di chuyển hay không
-            if (currentPlayer.getMoney() <= 0) {
-                currentPlayer.setState(PlayerState::Bankrupt);
-                cout << currentPlayer.getName() << " is bankrupt!" << endl;
-            }
+            // Kiểm tra trạng thái của người chơi
+            checkAndHandleBankruptcy(currentPlayer);
         }
     }
 }
 
-void Game::auctionProperty(Tile& tile) {
+void Game::auctionProperty(Tile& tile) { 
     cout << "\nStarting auction for " << tile.getName() << "!\n" << endl;
     int currentPrice = tile.getHousePrice();  // Giá khởi điểm bằng giá trị ban đầu của ô đất
     int highestBid = 0;                     // Giá thầu cao nhất hiện tại
@@ -268,6 +263,13 @@ void Game::setupChanceEvents() {
             cout << player.getName() << " moved to Worlds" << endl;
         },
         [=](Player& player, vector<Player*>& players) {
+            cout << player.getName() << " draws a Chance card: Advanced To Free Parking" << endl;
+            player.setPosition(24);
+            player.updateTargetPosition();
+            player.setTargetPosition(player.getX(), player.getY());
+            cout << player.getName() << " moved to Free Parking" << endl;
+        },
+        [=](Player& player, vector<Player*>& players) {
             cout << player.getName() << " draws a Chance card: Pay fine of 50." << endl;
             player.setMoney(player.getMoney() - 50);
             checkAndHandleBankruptcy(player);
@@ -307,7 +309,7 @@ void Game::setupChanceEvents() {
             player.setPosition(newPosition);
             // Cập nhật tọa độ hiển thị và trạng thái di chuyển
             player.updateTargetPosition();
-            player.setTargetPosition(player.getX(), player.getY()); // Bắt đầu di chuyển đến vị trí mới
+            player.setTargetPosition(player.getX(), player.getY());
             cout << player.getName() << " moved back to " << player.getPosition() << endl;
         },
         [=](Player& player, vector<Player*>& players) {
@@ -316,7 +318,6 @@ void Game::setupChanceEvents() {
             for (auto& otherPlayer : players) {
                 if (otherPlayer != &player) {
                     otherPlayer->setMoney(otherPlayer->getMoney() - repairCost);
-                    player.setMoney(player.getMoney() + repairCost);
                 }
             }
         },
@@ -347,10 +348,10 @@ void Game::handleBuyProperty(Player& currentPlayer, Tile& currentTile) {
             if (choice == 'Y' || choice == 'y') {
                 // Trừ tiền người chơi và đặt người chơi làm chủ sở hữu
                 currentPlayer.setMoney(currentPlayer.getMoney() - currentTile.getHousePrice());
-                checkAndHandleBankruptcy(currentPlayer);
                 currentTile.setOwnerName(currentPlayer.getName());
                 currentPlayer.addProperty(&currentTile); // Thêm đất vào danh sách tài sản
                 cout << currentPlayer.getName() << " bought " << currentTile.getName() << endl;
+                checkAndHandleBankruptcy(currentPlayer);
             }
             else {
                 auctionProperty(currentTile);
@@ -401,9 +402,9 @@ void Game::buyHouse(Tile& tile) {
 
         if (choice == 'Y' || choice == 'y') {
             currentPlayer.setMoney(currentPlayer.getMoney() - tile.getHousePrice());
-            checkAndHandleBankruptcy(currentPlayer);
             tile.setNumHouses(tile.getNumHouses() + 1);
             cout << "You have bought a house in " << tile.getName() << "." << endl;
+            checkAndHandleBankruptcy(currentPlayer);
         }
         else {
             cout << "You didn't buy a house." << endl;
@@ -436,10 +437,10 @@ void Game::buyBeach(Player& player, Tile& tile) {
 
             if (choice == 'Y' || choice == 'y') {
                 player.setMoney(player.getMoney() - BEACH_COST);
-                checkAndHandleBankruptcy(player);
                 tile.setOwnerName(player.getName());
                 player.addProperty(&tile);
                 cout << player.getName() << " bought the beach." << endl;
+                checkAndHandleBankruptcy(player);
             }
             else cout << player.getName() << " didn't buy the beach.";
             // Kiểm tra nếu người chơi sở hữu cả 4 bãi biển
@@ -541,6 +542,25 @@ void Game::checkAndHandleBankruptcy(Player& player) {
         player.setState(PlayerState::Bankrupt);
         cout << player.getName() << " is bankrupt!" << endl;
         handleBankruptcy(player);
+
+        // Kiểm tra xem có phải người chơi cuối cùng không
+        int numPlayersRemaining = count_if(
+            players.begin(),
+            players.end(),
+            [](const Player& p) { return p.getState() != PlayerState::Bankrupt; }
+        );
+
+        if (numPlayersRemaining == 1) {
+            // Tìm người chơi chiến thắng
+            Player& winner = *find_if(
+                players.begin(),
+                players.end(),
+                [](const Player& p) { return p.getState() != PlayerState::Bankrupt; }
+            );
+
+            cout << winner.getName() << " is the last player standing and wins the game!" << endl;
+            exit(0); // Kết thúc trò chơi
+        }
     }
 }
 
