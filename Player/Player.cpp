@@ -22,7 +22,6 @@ Player::Player(const string& playerName, int initialMoney)
     turnsOnLostIsland(0),
     isOnLostIsland(false),
     worldsUsed(0),
-    onWorldTour(false),
     hasMap(false)
 {}
 
@@ -44,16 +43,6 @@ bool Player::canBuyHouse(const Tile& tile) const {
 
 int Player::calculateNewPosition(int steps) const {
     return (position + steps + NUM_TILES) % NUM_TILES; // Bàn cờ có 32 ô
-}
-
-vector<Tile*> Player::getOwnedProperties() const {
-    vector<Tile*> ownedProperties;
-    for (Tile* tile : properties) { // Duyệt qua danh sách properties của người chơi
-        if (tile->getOwnerName() == name) { // Kiểm tra nếu người chơi sở hữu ô đất
-            ownedProperties.push_back(tile);
-        }
-    }
-    return ownedProperties;
 }
 
 void Player::move(int steps, vector<Tile>& board) {

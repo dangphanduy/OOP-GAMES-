@@ -5,6 +5,7 @@
 #include <vector>
 #include <unordered_set>
 #include "Tile.h"
+#include "Game.h"
 
 using namespace std;
 
@@ -16,6 +17,7 @@ private:
 	float x = 0.0f, y = 0.0f; // Vị trí hiện tại
 	float targetX = 0.0f, targetY = 0.0f; // vị trí mục tiêu
 
+	vector<Tile*> ownedProperties;
 	string name;
 	SDL_Texture* houseTexture;
 	vector<int> rollHistory;
@@ -30,10 +32,7 @@ private:
 	int turnsOnLostIsland = 0; // Số lượt trên Lost Island
 	bool isOnLostIsland = false;  // Người chơi có đang ở trên Lost Island không
 	int worldsUsed = 0;
-	bool onWorldTour = false;
 	bool hasMap = false;
-
-	bool hasReachedTarget() const;
 
 public:
 	explicit Player(const string& playerName, int initialMoney);
@@ -54,9 +53,9 @@ public:
 	int getTurnsOnLostIsland() const { return turnsOnLostIsland; }
 	bool getIsOnLostIsland() const { return isOnLostIsland; }
 	int getWorldsUsed() const { return worldsUsed; }
-	bool getOnWorldTour() const { return onWorldTour; }
 	bool getHasMap() const { return hasMap; }
 	SDL_Texture* getHouseTexture() const { return houseTexture; }
+	const vector<Tile*>& getOwnedProperties() const { return ownedProperties; }
 
 	// Setters
 	void setX(float x) { this->x = x; }
@@ -72,7 +71,6 @@ public:
 	void setProperties(const unordered_set<Tile*>& properties) { this->properties = properties; }
 	void setState(PlayerState state) { this->state = state; }
 	void setIsMoving(bool isMoving) { this->isMoving = isMoving; }
-	void setOnWorldTour(bool onWorldTour) { this->onWorldTour = onWorldTour; }
 	void setWorldsUsed(int worldsUsed) { this->worldsUsed = worldsUsed; }
 	void setTurnsOnLostIsland(int turnsOnLostIsland) { this->turnsOnLostIsland = turnsOnLostIsland; }
 	void setIsOnLostIsland(bool isOnLostIsland) { this->isOnLostIsland = isOnLostIsland; }
@@ -85,10 +83,10 @@ public:
 	void setTargetPosition(float x, float y);
 	void updateTargetPosition();
 	void updatePosition(float deltaTime, const vector<Player>& otherPlayers);
+	bool hasReachedTarget() const;
 	bool canBuyHouse(const Tile& tile) const;
 	void addProperty(Tile* tile);
 	int countHouses() const;
-	vector<Tile*> getOwnedProperties() const;
 	void clearProperties();
 };
 
