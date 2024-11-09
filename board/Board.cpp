@@ -57,7 +57,7 @@ void Board::handleWorldsEvent(Player& player) {
         selectedTile->setValueMultiplier(selectedTile->getValueMultiplier() + 1); // Tăng hệ số nhân lên theo cấp số cộng
         player.setWorldsUsed(player.getWorldsUsed() + 1); // Tăng số lần sử dụng "Worlds"
 
-        cout << "The value of " << selectedTile->getName() << " has been doubled!" << endl;
+        cout << "The value of " << selectedTile->getName() << " has been multiplied!" << endl;
         cout << "Multiplier: " << selectedTile->getValueMultiplier() << endl;
     }
     else {
