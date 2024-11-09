@@ -56,7 +56,6 @@ public:
 	bool getHasMap() const { return hasMap; }
 	SDL_Texture* getHouseTexture() const { return houseTexture; }
 	const vector<Tile*>& getOwnedProperties() const { return ownedProperties; }
-
 	// Setters
 	void setX(float x) { this->x = x; }
 	void setY(float y) { this->y = y; }
@@ -76,6 +75,16 @@ public:
 	void setIsOnLostIsland(bool isOnLostIsland) { this->isOnLostIsland = isOnLostIsland; }
 	void setHasMap(bool hasMap) { this->hasMap = hasMap; }
 	void setHouseTexture(SDL_Texture* texture) { houseTexture = texture; }
+
+	vector<Tile*> getOwnedProperty() const {
+		vector<Tile*> owned;
+		for (Tile* tile : properties) {
+			if (tile->getOwnerName() == this->name) { // Kiểm tra xem người chơi hiện tại có phải chủ sở hữu không
+				owned.push_back(tile);
+			}
+		}
+		return owned;
+	}
 
 	// Các phương thức công khai
 	int calculateNewPosition(int steps) const;
