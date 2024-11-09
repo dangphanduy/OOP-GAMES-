@@ -26,6 +26,7 @@ public:
     void initPlayers();
     void cleanup();
 
+    void setupChanceEvents();
     void handleEvents();
     void handleKeyPress(SDL_Keycode key);
     void update(float deltaTime);
@@ -40,8 +41,8 @@ public:
     void nextTurn(); 
 
     bool hasRolledDoubles(); 
-    void setupChanceEvents();
 
+    void handleBuyProperty(Player& currentPlayer, Tile& currentTile);
     void auctionProperty(Tile& tile);
     void buyHouse(Tile& tile);
     void buyBeach(Player& player, Tile& tile);
@@ -74,7 +75,7 @@ public:
     void setChanceEvents(const vector<function<void(Player&, vector<Player*>&)>>& newEvents) {
         this->chanceEvents = newEvents;
     }
-    void handleBuyProperty(Player& currentPlayer, Tile& currentTile);
+
 private:
     TTF_Font* font;
     Uint32 turnStartTime; // Biến lưu thời điểm bắt đầu lượt
