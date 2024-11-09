@@ -28,7 +28,7 @@ void Board::handleWorldsEvent(Player& player) {
     cout << player.getName() << " landed on Worlds!" << endl;
 
     // Lấy danh sách các ô đất mà người chơi sở hữu
-    const auto ownedProperties = player.getOwnedProperties();
+    const auto ownedProperties = player.getOwnedProperty();
 
     // Nếu người chơi không sở hữu ô đất nào
     if (ownedProperties.empty()) {
@@ -54,7 +54,7 @@ void Board::handleWorldsEvent(Player& player) {
     // Xử lý lựa chọn
     if (choice > 0 && choice <= ownedProperties.size()) {
         Tile* selectedTile = ownedProperties[choice - 1];
-        selectedTile->setValueMultiplier(selectedTile->getValueMultiplier() * 2); // Tăng hệ số nhân lên gấp đôi
+        selectedTile->setValueMultiplier(selectedTile->getValueMultiplier() + 1); // Tăng hệ số nhân lên theo cấp số cộng
         player.setWorldsUsed(player.getWorldsUsed() + 1); // Tăng số lần sử dụng "Worlds"
 
         cout << "The value of " << selectedTile->getName() << " has been doubled!" << endl;
@@ -92,6 +92,7 @@ void Board::applyTax(Player& player) {
         cout << player.getName() << " paid $" << taxAmount << " in taxes at "
             << taxTile->getName() << endl;
     }
+
     game->checkAndHandleBankruptcy(player);
 }
 // Tính toán vị trí cho từng ô
@@ -149,15 +150,15 @@ void Board::setupSpecialTiles() {
         cout << player->getName() << " is stranded on Lost Island!" << endl; })
         .build();
     board[16] = TileBuilder()
+        .withName("Free Parking")
+        .withType(TileType::FREE_PARKING)
+        .build();
+    board[24] = TileBuilder()
         .withName("Worlds")
         .withType(TileType::WORLDS)
         .withOnLand([this](Player* player) { 
         this->handleWorldsEvent(*player); 
             })
-        .build();
-    board[24] = TileBuilder()
-        .withName("Free Parking")
-        .withType(TileType::FREE_PARKING)
         .build();
     board[30] = TileBuilder()
         .withName("TAX")
@@ -333,7 +334,7 @@ void Board::renderPlayerAt(Player* player, int x, int y) {
 
 void Board::renderPlayers() {
     for (Player& player : game->getPlayers()) {
-        // Lấy vị trí hiện tại của người chơi
+        // Lấy ô hiện tại của người chơi
         Tile& tile = board[player.getPosition()];
 
         // Lấy số lượng người chơi trên cùng một ô (tile)
@@ -349,8 +350,8 @@ void Board::renderPlayers() {
             int offsetX = (i % 2 == 0) ? -10 : 10; // Chia người chơi thành 2 cột
             int offsetY = (i / 2) * 10;
 
-            // Render người chơi với tọa độ đã điều chỉnh
-            renderPlayerAt(p, tile.getX() + offsetX, tile.getY() + offsetY);
+            // Sử dụng tọa độ x, y của người chơi để render
+            renderPlayerAt(p, p->getX() + offsetX, p->getY() + offsetY);
             i++;
         }
     }
