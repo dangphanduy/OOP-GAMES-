@@ -28,6 +28,12 @@ const std::string HOUSE2_TEXTURE_PATH = "house2.png";
 const std::string HOUSE3_TEXTURE_PATH = "house3.png";
 const std::string HOUSE4_TEXTURE_PATH = "house4.png";
 
+// Đường dẫn tới hình ảnh người chơi
+const std::string PLAYER1_TEXTURE_PATH = "player1.png";
+const std::string PLAYER2_TEXTURE_PATH = "player2.png";
+const std::string PLAYER3_TEXTURE_PATH = "player3.png";
+const std::string PLAYER4_TEXTURE_PATH = "player4.png";
+
 // Phí mua bãi biển
 const int BEACH_COST = 200;
 

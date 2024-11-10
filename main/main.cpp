@@ -1,5 +1,5 @@
-﻿#include "Game.h"
-#include "PlayerInput.h"
+﻿#include "Game/Game.h"
+#include "Game/PlayerInput.h"
 #include <iostream>
 #include <iomanip>
 
