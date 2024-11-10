@@ -105,6 +105,9 @@ void Game::render() {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
     board->renderBoards();
+    for (Player& player : players) {
+        player.render(renderer); // Gọi hàm render của từng người chơi
+    }
     board->renderPlayers();
     renderPlayerInfo();
     SDL_RenderPresent(renderer);
@@ -129,58 +132,66 @@ void Game::renderText(const string& message, int x, int y, SDL_Color color) {
 }
 
 void Game::renderPlayerInfo() {
-    // Kích thước mỗi ô trong bảng
     int cellWidth = 200;
     int cellHeight = 30;
 
-    SDL_Color textColor = { 255, 255, 255, 255 }; // Trắng
-    SDL_Color tableColor = { 0, 0, 0, 255 }; // Đen
+    SDL_Color textColor = { 255, 255, 255, 255 }; // Màu trắng
+    SDL_Color tableColor = { 0, 0, 0, 255 }; // Màu đen
+    SDL_Color highlightColor = { 50, 50, 50, 255 }; // Màu nổi bật cho người chơi hiện tại
 
-    // Tọa độ X cho mỗi bảng
     int tableXPositions[4] = { 100, 100, 500, 500 };
-    int tableYPositions[4] = { 100, 400, 40, 340 };
+    int tableYPositions[4] = { 100, 400, 100, 400 };
 
-    for (int i = 0; i < players.size(); ++i) {
-        // Vị trí bắt đầu của bảng thông tin cho mỗi người chơi
+    for (int i = 0; i < players.size() && i < 4; ++i) {
         int tableX = tableXPositions[i];
         int tableY = tableYPositions[i];
+        int lineOffset = 0;
 
         if (i == currentPlayerIndex) {
             Uint32 timeLeft = TURN_TIME_LIMIT - (SDL_GetTicks() - turnStartTime);
-            string timeLeftText = "Time Left: " + to_string(timeLeft / 1000) + "s"; // Hiển thị thời gian theo giây
-            renderText(timeLeftText, tableX + 5, tableY + (i + 5) * cellHeight + 5, textColor); // Hiển thị dưới các thông tin khác
+            string timeLeftText = "Time Left: " + to_string(timeLeft / 1000) + "s";
+            renderText(timeLeftText, tableX + 5, tableY + lineOffset * cellHeight + 5, textColor);
+            lineOffset++;
         }
 
-        // Vẽ hình chữ nhật cho tên người chơi
-        SDL_Rect nameRect = { tableX, tableY + i * cellHeight, cellWidth, cellHeight };
-        SDL_SetRenderDrawColor(renderer, tableColor.r, tableColor.g, tableColor.b, tableColor.a);
+        SDL_SetRenderDrawColor(renderer, (i == currentPlayerIndex) ? highlightColor.r : tableColor.r,
+            (i == currentPlayerIndex) ? highlightColor.g : tableColor.g,
+            (i == currentPlayerIndex) ? highlightColor.b : tableColor.b,
+            tableColor.a);
+
+        SDL_Rect nameRect = { tableX, tableY + lineOffset * cellHeight, cellWidth, cellHeight };
         SDL_RenderFillRect(renderer, &nameRect);
 
-        // Hiển thị tên người chơi
-        renderText(players[i].getName(), tableX + 5, tableY + i * cellHeight + 5, textColor);
+        renderText(players[i].getName(), tableX + 5, tableY + lineOffset * cellHeight + 5, textColor);
+        lineOffset++;
 
-        // Hiển thị tiền của người chơi
         string moneyText = "Money: $" + to_string(players[i].getMoney());
-        renderText(moneyText, tableX + 5, tableY + (i + 1) * cellHeight + 5, textColor);
-        // Hiển thị vị trí của người chơi
+        renderText(moneyText, tableX + 5, tableY + lineOffset * cellHeight + 5, textColor);
+        lineOffset++;
+
         string positionText = "Position: " + to_string(players[i].getPosition());
-        renderText(positionText, tableX + 5, tableY + (i + 2) * cellHeight + 5, textColor);
-        // Hiển thị số nhà người chơi sở hữu
-        int numHouses = 0;
-        for (const Tile* tile : players[i].getOwnedProperties()) {
-            numHouses += tile->getNumHouses();
-        }
-        string houseText = "Houses: " + to_string(numHouses);
-        renderText(houseText, tableX + 5, tableY + (i + 3) * cellHeight + 5, textColor);
-        // Hiển thị số bãi biển người chơi sở hữu
+        renderText(positionText, tableX + 5, tableY + lineOffset * cellHeight + 5, textColor);
+        lineOffset++;
+
         int numBeaches = 0;
-        for (const Tile* property : players[i].getOwnedProperties()) {
+        for (const Tile* property : players[i].getOwnedProperty()) {
             if (property->getTileType() == TileType::BEACH) {
                 numBeaches++;
             }
         }
         string beachText = "Beaches: " + to_string(numBeaches);
-        renderText(beachText, tableX + 5, tableY + (i + 4) * cellHeight + 5, textColor);
+        renderText(beachText, tableX + 5, tableY + lineOffset * cellHeight + 5, textColor);
+        lineOffset++;
+
+        // Hiển thị tên của các ô đất đã sở hữu
+        renderText("Properties:", tableX + 5, tableY + lineOffset * cellHeight + 5, textColor);
+        lineOffset++;
+        for (const Tile* property : players[i].getOwnedProperty()) { 
+            renderText("- " + property->getName(), tableX + 10, tableY + lineOffset * cellHeight + 5, textColor);
+            lineOffset++;
+        }
     }
 }
+
+
 
