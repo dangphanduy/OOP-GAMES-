@@ -1,9 +1,9 @@
 ﻿#ifndef BOARD_H
 #define BOARD_H
 
-#include "Player.h"
-#include "Constants.h"
-#include "Game.h"
+#include "C:\Users\anhla\source\repos\GAME\GAME\Player\Player.h"
+#include "C:\Users\anhla\source\repos\GAME\GAME\Main\Constants.h"
+#include "C:\Users\anhla\source\repos\GAME\GAME\Game\Game.h"
 #include "Tile.h"
 #include <SDL.h>
 #include <vector>

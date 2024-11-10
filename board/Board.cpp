@@ -2,11 +2,11 @@
 #include <string>
 #include <algorithm>  
 #include <random> 
-#include "Player.h"
-#include "Board.h"
-#include "Constants.h"
-#include "Game.h"
-#include "TileBuilder.h"
+#include "Game/Game.h"
+#include "Player/Player.h"
+#include "Main/Constants.h"
+#include "Board/Board.h"
+#include "Board/TileBuilder.h"
 
 using namespace std;
 
