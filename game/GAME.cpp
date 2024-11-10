@@ -1,8 +1,8 @@
-﻿#include "Game.h"
-#include "Player.h"
-#include "Constants.h"
-#include "Board.h"
-#include "Tile.h"
+﻿#include "Game/Game.h"
+#include "Player/Player.h"
+#include "Main/Constants.h"
+#include "Board/Board.h"
+#include "Board/Tile.h"
 #include <SDL_image.h>
 #include <SDL_ttf.h>
 #include <iostream>

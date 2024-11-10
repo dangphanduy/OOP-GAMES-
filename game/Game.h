@@ -1,10 +1,10 @@
 ﻿#ifndef GAME_H
 #define GAME_H
 
-#include "Player.h"
-#include "Constants.h"
-#include "Board.h"
-#include "Tile.h"
+#include "Player\Player.h"
+#include "Main\Constants.h"
+#include "Board\Board.h"
+#include "Board\Tile.h"
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_ttf.h>
@@ -75,7 +75,6 @@ public:
     void setChanceEvents(const vector<function<void(Player&, vector<Player*>&)>>& newEvents) {
         this->chanceEvents = newEvents;
     }
-
 private:
     TTF_Font* font;
     Uint32 turnStartTime; // Biến lưu thời điểm bắt đầu lượt
