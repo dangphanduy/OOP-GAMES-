@@ -10,13 +10,19 @@
 
 using namespace std;
 
+void Tile::triggerOnLand(Player* player) {
+    if (onLand) {
+        onLand(player);
+    }
+}
+
 Board::Board(Game* game) : game(game) {}
 // Xử lý các sự kiện
 void Board::handleChanceEvent(Player& player) {
     random_device rd;
     mt19937 gen{ rd() };
-    uniform_int_distribution<> dis(0, game->getChanceEvents().size() - 1);
-    int eventIndex = dis(gen);
+    uniform_int_distribution<size_t> dis(0, game->getChanceEvents().size() - 1);
+    size_t eventIndex = dis(gen);
     vector<Player*> playerPointers;
     for (auto& player : game->getPlayers()) {
         playerPointers.push_back(&player);
@@ -57,7 +63,7 @@ void Board::handleWorldsEvent(Player& player) {
         selectedTile->setValueMultiplier(selectedTile->getValueMultiplier() + 1); // Tăng hệ số nhân lên theo cấp số cộng
         player.setWorldsUsed(player.getWorldsUsed() + 1); // Tăng số lần sử dụng "Worlds"
 
-        cout << "The value of " << selectedTile->getName() << " has been multiplied!" << endl;
+        cout << "The value of " << selectedTile->getName() << " has been multiplied" << endl;
         cout << "Multiplier: " << selectedTile->getValueMultiplier() << endl;
     }
     else {
@@ -67,7 +73,7 @@ void Board::handleWorldsEvent(Player& player) {
 
 void Board::applyTax(Player& player) {
     // Tìm ô Tax trên bàn cờ
-    static Tile* taxTile = nullptr; // Sử dụng static để lưu trữ giá trị giữa các lần gọi hàm
+    static Tile* taxTile = nullptr;
     if (taxTile == nullptr) {
         for (Tile& t : board) {
             if (t.getTileType() == TileType::TAX) {
@@ -86,7 +92,7 @@ void Board::applyTax(Player& player) {
         }
 
         // Tính tiền thuế (10% tổng giá trị nhà)
-        int taxAmount = 0.1 * totalHouseValue;
+        int taxAmount = static_cast<int>(0.1 * totalHouseValue);
         player.setMoney(player.getMoney() - taxAmount);
 
         cout << player.getName() << " paid $" << taxAmount << " in taxes at "
@@ -329,7 +335,7 @@ void Board::renderBoards() {
 // Vẽ người chơi
 void Board::renderPlayerAt(Player* player, int x, int y) {
     SDL_Texture* playerTexture = player->getSprite();
-    game->drawPlayer(playerTexture, player->getX(), player->getY());
+    game->drawPlayer(playerTexture, static_cast<int>(player->getX()), static_cast<int>(player->getY()));
 }
 
 void Board::renderPlayers() {
@@ -338,7 +344,7 @@ void Board::renderPlayers() {
         Tile& tile = board[player.getPosition()];
 
         // Lấy số lượng người chơi trên cùng một ô (tile)
-        int numPlayers = tile.getPlayersOnTile().size();
+        size_t numPlayers = tile.getPlayersOnTile().size();
 
         // Nếu không có người chơi nào trên ô, bỏ qua việc render
         if (numPlayers == 0) continue;
@@ -351,7 +357,7 @@ void Board::renderPlayers() {
             int offsetY = (i / 2) * 10;
 
             // Sử dụng tọa độ x, y của người chơi để render
-            renderPlayerAt(p, p->getX() + offsetX, p->getY() + offsetY);
+            renderPlayerAt(p, static_cast<int>(p->getX() + offsetX), static_cast<int>(p->getY() + offsetY));
             i++;
         }
     }

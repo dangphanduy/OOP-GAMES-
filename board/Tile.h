@@ -32,7 +32,7 @@ enum class TileType {
     BEACH,
     WORLDS,
     LOST_ISLAND,
-    WORLD_TOUR,
+    FREE_PARKING,
     TAX
 };
 
@@ -71,21 +71,28 @@ public:
     function<void(Player*)> getOnLand() const { return onLand; }
     void setOnLand(const function<void(Player*)>& newOnLand) { onLand = newOnLand; }
 
-    void triggerOnLand(Player* player) {
-        if (onLand) {
-            onLand(player);
-        }
-    }
+    void triggerOnLand(Player* player);
 
     // Thêm người chơi vào ô
     void addPlayer(Player* player) {
-        playersOnTile.insert(player);
+        if (playersOnTile.find(player) == playersOnTile.end()) { // Kiểm tra trùng lặp
+            auto result = playersOnTile.insert(player);
+        }
     }
 
     // Xóa người chơi khỏi ô
     void removePlayer(Player* player) {
-        playersOnTile.erase(player);
+        auto it = playersOnTile.find(player);
+        if (it != playersOnTile.end()) {
+            playersOnTile.erase(it);
+        }
     }
+
+    void resetOwnership() {
+        setOwnerName("");
+        setNumHouses(0);
+    }
+
 private:
     string name;
     string ownerName;
