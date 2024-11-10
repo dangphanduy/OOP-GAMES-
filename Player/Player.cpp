@@ -22,19 +22,25 @@ Player::Player(const string& playerName, int initialMoney)
     turnsOnLostIsland(0),
     isOnLostIsland(false),
     worldsUsed(0),
-    hasMap(false)
+    hasMap(false),
+    houseTexture(houseTexture)
 {}
+
+void Player::render(SDL_Renderer* renderer) {
+    // 1. Tạo SDL_Rect để xác định vị trí và kích thước của người chơi trên màn hình
+    SDL_Rect renderQuad = {
+        static_cast<int>(x),
+        static_cast<int>(y),
+        spriteWidth,
+        spriteHeight
+    };
+
+    // 2. Sử dụng SDL_RenderCopy để vẽ texture (hình ảnh) của người chơi lên renderer
+    SDL_RenderCopy(renderer, sprite, NULL, &renderQuad);
+}
 
 void Player::addProperty(Tile* tile) {
     properties.insert(tile);
-}
-
-int Player::countHouses() const {
-    int totalHouses = 0;
-    for (const auto& property : properties) {
-        totalHouses += property->getNumHouses();
-    }
-    return totalHouses;
 }
 
 bool Player::canBuyHouse(const Tile& tile) const {
@@ -50,43 +56,44 @@ void Player::move(int steps, vector<Tile>& board) {
     Tile& oldTile = board[position];
     oldTile.removePlayer(this);
 
-    // Di chuyển người chơi đến vị trí mới
-    int newPosition = calculateNewPosition(steps);
-    position = newPosition;
-    Tile& targetTile = board[newPosition];
+    // Tính vị trí mới và cập nhật
+    position = calculateNewPosition(steps);
+    Tile& targetTile = board[position];
 
     // Cập nhật vị trí đích và trạng thái di chuyển
-    setTargetPosition(targetTile.getX(), targetTile.getY());
-    updateTargetPosition();
-    isMoving = true; // Đặt isMoving = true sau khi cập nhật vị trí đích
+    setTargetPosition(static_cast<int>(targetTile.getX()), static_cast<int>(targetTile.getY()));
+    isMoving = true;
 
     // Thêm người chơi vào ô mới
-    Tile& newTile = board[position];
-    newTile.addPlayer(this);
+    targetTile.addPlayer(this);
 }
 
 void Player::setTargetPosition(float x, float y) {
     targetX = x;
     targetY = y;
-    isMoving = true;
 }
 
 void Player::updateTargetPosition() {
-    if (position < 8) {
-        targetX = position * TILE_SIZE;
+    int side = position / numTilesPerSide; // Xác định cạnh của bàn cờ (0: trên, 1: phải, 2: dưới, 3: trái)
+    int tilePos = position % numTilesPerSide; // Vị trí của ô trên cạnh đó
+
+    switch (side) {
+    case 0: // Cạnh trên
+        targetX = tilePos * TILE_SIZE;
         targetY = 0;
-    }
-    else if (position < 16) {
-        targetX = SCREEN_WIDTH - TILE_SIZE;
-        targetY = (position - 8) * TILE_SIZE;
-    }
-    else if (position < 24) {
-        targetX = SCREEN_WIDTH - (position - 16) * TILE_SIZE - TILE_SIZE;
-        targetY = SCREEN_HEIGHT - TILE_SIZE;
-    }
-    else {
+        break;
+    case 1: // Cạnh phải
+        targetX = numTilesPerSide * TILE_SIZE;
+        targetY = tilePos * TILE_SIZE;
+        break;
+    case 2: // Cạnh dưới
+        targetX = (numTilesPerSide - tilePos - 1) * TILE_SIZE;
+        targetY = numTilesPerSide * TILE_SIZE;
+        break;
+    case 3: // Cạnh trái
         targetX = 0;
-        targetY = SCREEN_HEIGHT - (position - 24) * TILE_SIZE - TILE_SIZE;
+        targetY = (numTilesPerSide - tilePos - 1) * TILE_SIZE;
+        break;
     }
 }
 

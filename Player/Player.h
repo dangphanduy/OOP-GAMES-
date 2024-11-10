@@ -56,6 +56,7 @@ public:
 	bool getHasMap() const { return hasMap; }
 	SDL_Texture* getHouseTexture() const { return houseTexture; }
 	const vector<Tile*>& getOwnedProperties() const { return ownedProperties; }
+
 	// Setters
 	void setX(float x) { this->x = x; }
 	void setY(float y) { this->y = y; }
@@ -74,7 +75,7 @@ public:
 	void setTurnsOnLostIsland(int turnsOnLostIsland) { this->turnsOnLostIsland = turnsOnLostIsland; }
 	void setIsOnLostIsland(bool isOnLostIsland) { this->isOnLostIsland = isOnLostIsland; }
 	void setHasMap(bool hasMap) { this->hasMap = hasMap; }
-	void setHouseTexture(SDL_Texture* texture) { houseTexture = texture; }
+	void setHouseTexture(SDL_Texture* texture) { this->houseTexture = texture; }
 
 	vector<Tile*> getOwnedProperty() const {
 		vector<Tile*> owned;
@@ -87,6 +88,7 @@ public:
 	}
 
 	// Các phương thức công khai
+	void render(SDL_Renderer* renderer);
 	int calculateNewPosition(int steps) const;
 	void move(int steps, vector<Tile>& board);
 	void setTargetPosition(float x, float y);
@@ -95,7 +97,6 @@ public:
 	bool hasReachedTarget() const;
 	bool canBuyHouse(const Tile& tile) const;
 	void addProperty(Tile* tile);
-	int countHouses() const;
 	void clearProperties();
 };
 
