@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 #include <unordered_set>
-#include "Tile.h"
-#include "Game.h"
+#include "Board\Tile.h"
+#include "Game\Game.h"
 
 using namespace std;
 

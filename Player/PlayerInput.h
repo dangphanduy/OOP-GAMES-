@@ -4,6 +4,8 @@
 #include <vector>
 #include <string>
 
-std::vector<std::string> getPlayerNames();
+using namespace std;
+
+vector<string> getPlayerNames();
 
 #endif

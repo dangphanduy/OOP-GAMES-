@@ -1,7 +1,7 @@
-﻿#include "Player.h"
-#include "Constants.h"
-#include "Game.h"
-#include "Board.h"
+﻿#include "Game/Game.h"
+#include "Player/Player.h"
+#include "Main/Constants.h"
+#include "Board/Board.h"
 #include <iostream>
 #include <cmath>
 
